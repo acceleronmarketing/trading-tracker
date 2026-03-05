@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thesis — v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --s1: #111111;
+  --s2: #1a1a1a;
+  --s3: #222222;
+  --b1: #2a2a2a;
+  --b2: #383838;
+  --b3: #484848;
+  --text: #f0f0f0;
+  --muted: #888888;
+  --muted2: #606060;
+  --accent: #d4f54e;
+  --green: #4ef5a0;
+  --red: #f5504e;
+  --orange: #f5954e;
+  --yellow: #f5d44e;
+  --blue: #4ea8f5;
+  --purple: #a04ef5;
+  --fh: 'Syne', sans-serif;
+  --fm: 'IBM Plex Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body { background:var(--bg); color:var(--text); font-family:var(--fm); font-size:12px; line-height:1.6; overflow:hidden; }
+
+/* ── Layout ── */
+.shell { display:flex; height:100vh; }
+.rail { width:52px; background:var(--s1); border-right:1px solid var(--b1); display:flex; flex-direction:column; align-items:center; padding:16px 0; gap:4px; flex-shrink:0; }
+.sidebar { width:240px; background:var(--s1); border-right:1px solid var(--b1); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; }
+.main { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+
+/* ── Rail ── */
+.rail-btn { width:36px; height:36px; background:none; border:none; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition:color 0.15s; border-radius:4px; position:relative; }
+.rail-btn:hover, .rail-btn.active { color:var(--text); background:var(--s2); }
+.rail-btn.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:2px; height:20px; background:var(--accent); border-radius:0 2px 2px 0; }
+.rail-sep { width:24px; height:1px; background:var(--b1); margin:6px 0; }
+.rail-logo { font-family:var(--fh); font-size:11px; font-weight:800; color:var(--accent); writing-mode:vertical-rl; text-orientation:mixed; letter-spacing:0.12em; margin-bottom:12px; }
+
+/* ── Sidebar ── */
+.sb-top { padding:16px 14px 10px; border-bottom:1px solid var(--b1); }
+.sb-search { width:100%; background:var(--s2); border:1px solid var(--b1); color:var(--text); font-family:var(--fm); font-size:11px; padding:7px 10px; outline:none; }
+.sb-search:focus { border-color:var(--accent); }
+.sb-list { flex:1; overflow-y:auto; }
+.sb-list::-webkit-scrollbar { width:2px; }
+.sb-list::-webkit-scrollbar-thumb { background:var(--b2); }
+
+.sb-item { padding:10px 14px; cursor:pointer; border-left:2px solid transparent; transition:all 0.1s; }
+.sb-item:hover { background:var(--s2); }
+.sb-item.active { background:var(--s2); border-left-color:var(--accent); }
+.sb-item-top { display:flex; align-items:center; gap:7px; }
+.sb-ticker { font-family:var(--fh); font-size:13px; font-weight:700; }
+.sb-badges { display:flex; gap:4px; margin-left:auto; align-items:center; }
+.sb-meta { font-size:10px; color:#888; margin-top:2px; display:flex; gap:8px; }
+
+/* ── Topbar ── */
+.topbar { height:48px; border-bottom:1px solid var(--b1); display:flex; align-items:center; padding:0 24px; gap:16px; background:var(--s1); flex-shrink:0; }
+.topbar-title { font-family:var(--fh); font-size:15px; font-weight:800; letter-spacing:-0.3px; }
+.topbar-right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+.topbar-stat { text-align:right; }
+.topbar-stat-val { font-family:var(--fh); font-size:14px; font-weight:700; line-height:1; }
+.topbar-stat-label { font-size:9px; color:#999; letter-spacing:0.08em; text-transform:uppercase; }
+.topbar-divider { width:1px; height:24px; background:var(--b1); }
+
+/* ── Content ── */
+.content { flex:1; overflow-y:auto; padding:24px 28px; }
+.content::-webkit-scrollbar { width:3px; }
+.content::-webkit-scrollbar-thumb { background:var(--b2); }
+
+/* ── Mode tabs ── */
+.mode-tabs { display:flex; gap:2px; background:var(--s2); border:1px solid var(--b1); padding:3px; margin-bottom:20px; width:fit-content; }
+.mode-tab { padding:5px 14px; font-family:var(--fh); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; color:var(--muted); border:none; background:none; transition:all 0.15s; }
+.mode-tab.active { background:var(--accent); color:#000; }
+
+/* ── Quick Capture ── */
+.qc-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:8px; }
+.qc-group { display:flex; flex-direction:column; gap:5px; }
+.qc-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; }
+
+/* Toggle group */
+.tog-group { display:flex; gap:2px; }
+.tog { flex:1; background:var(--s2); border:1px solid var(--b2); color:#aaa; padding:7px 4px; font-family:var(--fm); font-size:10px; cursor:pointer; text-align:center; transition:all 0.12s; white-space:nowrap; }
+.tog:hover { color:var(--text); }
+.tog.on { color:#000 !important; font-weight:600; }
+
+/* inputs */
+input, textarea, select {
+  background:var(--s2); border:1px solid var(--b2); color:var(--text);
+  font-family:var(--fm); font-size:12px; padding:7px 10px; outline:none;
+  width:100%; transition:border-color 0.15s;
+}
+input:focus, textarea:focus, select:focus { border-color:var(--accent); }
+textarea { resize:vertical; min-height:72px; }
+select option { background:var(--s2); }
+input::placeholder, textarea::placeholder { color:#666; }
+
+/* ── Section ── */
+.sec-label { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:#999; margin:20px 0 10px; display:flex; align-items:center; gap:8px; }
+.sec-label::after { content:''; flex:1; height:1px; background:var(--b1); }
+.form-row { display:grid; gap:10px; margin-bottom:10px; }
+.form-row.cols2 { grid-template-columns:1fr 1fr; }
+.form-row.cols3 { grid-template-columns:1fr 1fr 1fr; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.field-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; }
+
+/* ── Phase picker ── */
+.phase-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+.phase-tile { background:var(--s2); border:1px solid var(--b1); padding:8px 6px; text-align:center; cursor:pointer; transition:all 0.12s; }
+.phase-tile-name { font-size:10px; font-weight:600; letter-spacing:0.04em; }
+.phase-tile-sub { font-size:9px; color:#888; margin-top:2px; }
+.phase-tile.on .phase-tile-sub { color:rgba(0,0,0,0.6); }
+
+/* ── Badges ── */
+.badge { font-size:9px; padding:2px 6px; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; border:1px solid; display:inline-block; }
+.b-open { color:var(--yellow); border-color:var(--yellow); }
+.b-win { color:var(--green); border-color:var(--green); }
+.b-loss { color:var(--red); border-color:var(--red); }
+.b-miss { color:var(--muted); border-color:var(--muted2); }
+.b-watch { color:var(--blue); border-color:var(--blue); }
+
+/* phase dots */
+.pdot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+/* ── Buttons ── */
+.btn { padding:9px 20px; font-family:var(--fh); font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; cursor:pointer; border:none; transition:all 0.15s; }
+.btn-primary { background:var(--accent); color:#000; }
+.btn-primary:hover { background:#e2ff60; }
+.btn-ghost { background:none; border:1px solid var(--b2); color:var(--muted); font-family:var(--fm); font-size:11px; padding:9px 16px; cursor:pointer; transition:all 0.15s; }
+.btn-ghost:hover { color:var(--text); border-color:var(--muted); }
+.btn-danger { background:none; border:1px solid transparent; color:var(--red); font-family:var(--fm); font-size:11px; padding:9px 12px; cursor:pointer; transition:all 0.15s; margin-left:auto; }
+.btn-danger:hover { border-color:var(--red); }
+.btn-row { display:flex; gap:8px; align-items:center; margin-top:24px; padding-top:20px; border-top:1px solid var(--b1); }
+
+/* ── Detail view ── */
+.det-hero { margin-bottom:20px; }
+.det-ticker { font-family:var(--fh); font-size:32px; font-weight:800; letter-spacing:-1px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.det-sub { font-size:10px; color:var(--muted); margin-top:6px; letter-spacing:0.06em; }
+.det-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:1px; background:var(--b1); border:1px solid var(--b1); margin:16px 0 20px; }
+.det-cell { background:var(--s2); padding:12px 14px; }
+.det-cell-val { font-family:var(--fh); font-size:14px; font-weight:700; margin-top:3px; }
+.field-view { margin-bottom:18px; }
+.field-view-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; margin-bottom:6px; }
+.field-view-body { color:var(--text); line-height:1.8; border-left:2px solid var(--b2); padding-left:12px; }
+
+/* ── Cycle bar ── */
+.cycle-wrap { margin:10px 0; }
+.cycle-bar { display:flex; gap:3px; height:3px; }
+.cycle-seg { flex:1; border-radius:2px; opacity:0.2; transition:opacity 0.2s; }
+.cycle-seg.on { opacity:1; }
+.cycle-labels { display:flex; margin-top:5px; }
+.cycle-lbl { flex:1; font-size:9px; color:#777; }
+.cycle-lbl.on { color:var(--text); }
+
+/* ── Pre-exit modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:100; }
+.modal { background:var(--s1); border:1px solid var(--b2); padding:28px; max-width:480px; width:90%; }
+.modal-title { font-family:var(--fh); font-size:18px; font-weight:800; margin-bottom:6px; }
+.modal-sub { color:var(--muted); font-size:11px; margin-bottom:20px; line-height:1.7; }
+.thesis-preview { background:var(--s2); border-left:3px solid var(--accent); padding:12px 14px; margin-bottom:20px; font-size:11px; line-height:1.8; color:var(--text); }
+.intact-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:16px; }
+.intact-opt { background:var(--s2); border:1px solid var(--b2); padding:12px 8px; text-align:center; cursor:pointer; transition:all 0.15s; }
+.intact-opt:hover { border-color:var(--muted); }
+.intact-opt.on { border-color:var(--accent); background:rgba(212,245,78,0.08); }
+.intact-opt-icon { font-size:20px; margin-bottom:4px; }
+.intact-opt-label { font-family:var(--fh); font-size:11px; font-weight:700; }
+.intact-opt-sub { font-size:9px; color:#888; margin-top:2px; }
+
+/* ── Stats ── */
+.stats-main { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--b1); border:1px solid var(--b1); margin-bottom:24px; }
+.stat-card { background:var(--s2); padding:16px 18px; }
+.stat-card-val { font-family:var(--fh); font-size:24px; font-weight:800; margin-top:4px; letter-spacing:-0.5px; }
+.stats-row-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+.stats-table-wrap { background:var(--s2); border:1px solid var(--b1); padding:16px; }
+.stats-table { width:100%; border-collapse:collapse; }
+.stats-table th { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-align:left; padding:6px 10px; border-bottom:1px solid var(--b1); font-weight:400; }
+.stats-table td { padding:8px 10px; border-bottom:1px solid var(--b1); font-size:11px; }
+.stats-table tr:last-child td { border-bottom:none; }
+.bar-wrap { display:flex; align-items:center; gap:8px; }
+.bar-bg { flex:1; height:3px; background:var(--b2); border-radius:2px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:2px; }
+
+/* ── Empty ── */
+.empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center; gap:10px; color:var(--muted); }
+.empty-glyph { font-family:var(--fh); font-size:42px; font-weight:800; color:var(--b2); letter-spacing:-2px; }
+
+/* ── Animations ── */
+.fade-in { animation:fi 0.18s ease; }
+@keyframes fi { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
+
+/* new-entry highlight */
+.new-flash { animation:flash 0.5s ease; }
+@keyframes flash { 0%,100%{ background:var(--s2); } 50%{ background:rgba(212,245,78,0.12); } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Rail -->
+  <div class="rail">
+    <div class="rail-logo">T</div>
+    <button class="rail-btn active" id="rb-journal" onclick="switchView('journal')" title="Journal">⊞</button>
+    <button class="rail-btn" id="rb-stats" onclick="switchView('stats')" title="Stats">◈</button>
+    <div class="rail-sep"></div>
+    <button class="rail-btn" id="rb-new" onclick="startNewEntry()" title="New Entry" style="color:var(--accent)">＋</button>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-top">
+      <input class="sb-search" placeholder="search ticker, narrative…" oninput="filterSearch(this.value)" id="sb-search">
+    </div>
+    <div class="sb-list" id="sb-list"></div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Thesis Tracker</div>
+      <div class="topbar-right" id="topbar-right"></div>
+    </div>
+    <div class="content" id="content">
+      <div class="empty fade-in">
+        <div class="empty-glyph">∅</div>
+        <div style="font-family:var(--fh);font-weight:700;color:var(--text)">No entries yet.</div>
+        <div style="font-size:11px;max-width:260px">Every trade starts with a narrative. Start capturing yours.</div>
+        <button class="btn btn-primary" onclick="startNewEntry()" style="margin-top:8px">New Entry</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pre-exit modal -->
+<div class="modal-overlay" id="exit-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Close Position</div>
+    <div class="modal-sub">Before you close this trade, review your original thesis.<br>Was it right — even if price wasn't?</div>
+    <div class="thesis-preview" id="exit-thesis-preview"></div>
+    <div class="field-label" style="margin-bottom:8px">Is your thesis still intact?</div>
+    <div class="intact-opts">
+      <div class="intact-opt" onclick="setIntact('yes')">
+        <div class="intact-opt-icon">✓</div>
+        <div class="intact-opt-label">Yes</div>
+        <div class="intact-opt-sub">Narrative played out</div>
+      </div>
+      <div class="intact-opt" onclick="setIntact('partial')">
+        <div class="intact-opt-icon">~</div>
+        <div class="intact-opt-label">Partial</div>
+        <div class="intact-opt-sub">Mixed result</div>
+      </div>
+      <div class="intact-opt" onclick="setIntact('no')">
+        <div class="intact-opt-icon">✗</div>
+        <div class="intact-opt-label">No</div>
+        <div class="intact-opt-sub">Thesis was wrong</div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <div class="field-label">What actually happened? (optional)</div>
+      <textarea id="exit-postmortem" placeholder="Narrative played out but price didn't follow. Exited on liquidity drain not thesis invalidation…" rows="3"></textarea>
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <div class="field-label">Exit Price</div>
+        <input id="exit-price" type="text" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <div class="field-label">Outcome</div>
+        <select id="exit-outcome">
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+          <option value="miss">Missed / Passed</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row" style="border:none;padding:0;margin-top:16px">
+      <button class="btn btn-primary" onclick="confirmExit()">Close Trade</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ───── State ─────
+const PHASES = ['Emerging','Building','Peak','Fading','Dead'];
+const PCOLORS = ['#4ef5a0','#d4f54e','#f5d44e','#f5954e','#525252'];
+const PSUBS = ['hours–days','narrative growing','full attention','losing steam','forgotten'];
+const CHAINS = ['SOL','BASE','ETH','ARB','OTHER'];
+const SOURCES = ['Own Scan','CT','TG Alpha','Insider','Copy'];
+const TIMESCALES = ['Hours','Days','Weeks','Months'];
+const SIZES = ['0.5×','1×','2×','3×'];
+const DIRS = ['Long','Short','Watch','Pass'];
+const OUTCOMES = ['open','win','loss','miss'];
+
+let db = JSON.parse(localStorage.getItem('thesis-v2') || '[]');
+let currentId = null;
+let currentView = 'journal';
+let searchQ = '';
+let _exitId = null;
+let _intactVal = null;
+
+// form state
+let fs = {};
+
+function save() { localStorage.setItem('thesis-v2', JSON.stringify(db)); }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+function fmt(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function fmtFull(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+// ───── Sidebar ─────
+function renderSidebar() {
+  const list = document.getElementById('sb-list');
+  let items = db.slice().reverse();
+  if (searchQ) {
+    const q = searchQ.toLowerCase();
+    items = items.filter(e =>
+      (e.ticker||'').toLowerCase().includes(q) ||
+      (e.narrativeCore||'').toLowerCase().includes(q) ||
+      (e.chain||'').toLowerCase().includes(q)
+    );
+  }
+  if (!items.length) {
+    list.innerHTML = `<div style="padding:16px;color:var(--muted);font-size:11px;text-align:center">No entries</div>`;
+    return;
+  }
+  list.innerHTML = items.map(e => {
+    const pi = PHASES.indexOf(e.phase);
+    const pc = PCOLORS[pi] || 'var(--muted)';
+    return `
+      <div class="sb-item ${e.id===currentId?'active':''}" onclick="selectEntry('${e.id}')">
+        <div class="sb-item-top">
+          <div class="pdot" style="background:${pc}"></div>
+          <div class="sb-ticker">${e.ticker||'—'}</div>
+          <div class="sb-badges">
+            <span class="badge b-${e.outcome}">${e.outcome}</span>
+          </div>
+        </div>
+        <div class="sb-meta">
+          <span>${e.chain||''}</span>
+          <span>${fmt(e.createdAt)}</span>
+          <span style="color:${pc}">${e.phase||''}</span>
+        </div>
+      </div>`;
+  }).join('');
+  renderTopbarStats();
+}
+
+function filterSearch(q) {
+  searchQ = q;
+  renderSidebar();
+}
+
+function renderTopbarStats() {
+  const total = db.length;
+  const open = db.filter(e=>e.outcome==='open').length;
+  const wins = db.filter(e=>e.outcome==='win').length;
+  const closed = db.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
+  const wr = closed > 0 ? Math.round(wins/closed*100) : 0;
+  document.getElementById('topbar-right').innerHTML = `
+    <div class="topbar-stat"><div class="topbar-stat-val" style="color:var(--accent)">${total}</div><div class="topbar-stat-label">Total</div></div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-stat"><div class="topbar-stat-val" style="color:var(--yellow)">${open}</div><div class="topbar-stat-label">Open</div></div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-stat"><div class="topbar-stat-val" style="color:var(--green)">${wr}%</div><div class="topbar-stat-label">Win Rate</div></div>
+  `;
+}
+
+// ───── View switching ─────
+function switchView(v) {
+  currentView = v;
+  ['journal','stats'].forEach(k => {
+    document.getElementById('rb-'+k)?.classList.toggle('active', k===v);
+  });
+  if (v==='stats') { currentId=null; renderStats(); }
+  else { renderSidebar(); if (currentId) { const e=db.find(x=>x.id===currentId); if(e) renderDetail(e); } else showEmpty(); }
+}
+
+// ───── New entry ─────
+function startNewEntry() {
+  currentId = null;
+  currentView = 'journal';
+  document.getElementById('rb-journal').classList.add('active');
+  document.getElementById('rb-stats').classList.remove('active');
+  fs = { phase:'Emerging', chain:'SOL', source:'Own Scan', size:'1×', direction:'Long', timescale:'Days', outcome:'open' };
+  document.getElementById('topbar-title').textContent = 'New Entry';
+  renderForm(null);
+  renderSidebar();
+}
+
+function selectEntry(id) {
+  currentId = id;
+  currentView = 'journal';
+  renderSidebar();
+  const e = db.find(x=>x.id===id);
+  if (e) renderDetail(e);
+}
+
+function showEmpty() {
+  document.getElementById('topbar-title').textContent = 'Thesis Tracker';
+  document.getElementById('content').innerHTML = `
+    <div class="empty fade-in">
+      <div class="empty-glyph">∅</div>
+      <div style="font-family:var(--fh);font-weight:700;color:var(--text)">Select or create an entry.</div>
+    </div>`;
+}
+
+// ───── Form ─────
+function renderForm(e) {
+  const isNew = !e;
+  if (e) {
+    fs = {
+      phase: e.phase||'Emerging', chain: e.chain||'SOL', source: e.source||'Own Scan',
+      size: e.size||'1×', direction: e.direction||'Long', timescale: e.timescale||'Days',
+      outcome: e.outcome||'open'
+    };
+  }
+
+  document.getElementById('content').innerHTML = `
+  <div class="fade-in">
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="mt-quick" onclick="setFormMode('quick')">Quick Capture</button>
+      <button class="mode-tab" id="mt-full" onclick="setFormMode('full')">Full Thesis</button>
+    </div>
+
+    <!-- QUICK CAPTURE -->
+    <div id="form-quick">
+      <div class="qc-grid">
+        <div class="qc-group">
+          <div class="qc-label">Ticker</div>
+          <input id="f-ticker" type="text" placeholder="e.g. BONK" value="${e?.ticker||''}" style="font-family:var(--fh);font-weight:700;font-size:16px;">
+        </div>
+        <div class="qc-group">
+          <div class="qc-label">Chain</div>
+          <div class="tog-group" id="tg-chain">
+            ${CHAINS.map(c=>`<div class="tog ${fs.chain===c?'on':''}" style="${fs.chain===c?'background:var(--blue);border-color:var(--blue);':''}" onclick="tog('chain','${c}',this,'var(--blue)')">${c}</div>`).join('')}
+          </div>
+        </div>
+        <div class="qc-group">
+          <div class="qc-label">Direction</div>
+          <div class="tog-group" id="tg-dir">
+            ${DIRS.map(d=>`<div class="tog ${fs.direction===d?'on':''}" style="${fs.direction===d?'background:var(--accent);border-color:var(--accent);':''}" onclick="tog('direction','${d}',this,'var(--accent)')">${d}</div>`).join('')}
+          </div>
+        </div>
+        <div class="qc-group">
+          <div class="qc-label">Source</div>
+          <div class="tog-group" id="tg-source">
+            ${SOURCES.map(s=>`<div class="tog ${fs.source===s?'on':''}" style="${fs.source===s?'background:var(--purple);border-color:var(--purple);':''}" onclick="tog('source','${s}',this,'var(--purple)')">${s}</div>`).join('')}
+          </div>
+        </div>
+        <div class="qc-group">
+          <div class="qc-label">Size (vs normal)</div>
+          <div class="tog-group" id="tg-size">
+            ${SIZES.map(s=>`<div class="tog ${fs.size===s?'on':''}" style="${fs.size===s?'background:var(--orange);border-color:var(--orange);':''}" onclick="tog('size','${s}',this,'var(--orange)')">${s}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row cols3" style="margin-top:10px">
+        <div class="form-group">
+          <div class="field-label">MC at Entry</div>
+          <input id="f-mc" type="text" placeholder="e.g. $2M, $800k" value="${e?.mc||''}">
+        </div>
+        <div class="form-group">
+          <div class="field-label">Entry Price</div>
+          <input id="f-entry" type="text" placeholder="0.00" value="${e?.entry||''}">
+        </div>
+        <div class="form-group">
+          <div class="field-label">Outcome</div>
+          <select id="f-outcome" onchange="fs.outcome=this.value">
+            ${OUTCOMES.map(o=>`<option value="${o}" ${fs.outcome===o?'selected':''}>${o.charAt(0).toUpperCase()+o.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">One-line thesis — what are you betting on?</div>
+        <input id="f-thesis1" type="text" placeholder="e.g. First memecoin on new Base deployment, KOL already posting, MC still sub $1M" value="${e?.thesis1||''}">
+      </div>
+
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">Exit Trigger — what will make you sell?</div>
+        <input id="f-exitTrigger" type="text" placeholder="e.g. KOL stops posting, MC hits $10M, or liquidity starts pulling" value="${e?.exitTrigger||''}">
+      </div>
+    </div>
+
+    <!-- FULL THESIS (hidden by default) -->
+    <div id="form-full" style="display:none">
+      <div class="sec-label">Narrative Phase</div>
+      <div class="phase-grid" style="margin-bottom:14px">
+        ${PHASES.map((p,i)=>`
+          <div class="phase-tile ${fs.phase===p?'on':''}" id="pt-${p}"
+            style="${fs.phase===p?`background:${PCOLORS[i]};border-color:${PCOLORS[i]};`:''}"
+            onclick="selectPhase('${p}',${i})">
+            <div class="phase-tile-name" style="color:${fs.phase===p?'#000':'var(--text)'}">${p}</div>
+            <div class="phase-tile-sub">${PSUBS[i]}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="form-row cols2">
+        <div class="form-group">
+          <div class="field-label">Narrative Timescale</div>
+          <div class="tog-group" id="tg-ts">
+            ${TIMESCALES.map(t=>`<div class="tog ${fs.timescale===t?'on':''}" style="${fs.timescale===t?'background:var(--green);border-color:var(--green);':''}" onclick="tog('timescale','${t}',this,'var(--green)')">${t}</div>`).join('')}
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="field-label">Dev / Supply Risk</div>
+          <input id="f-devRisk" type="text" placeholder="e.g. Dev 8%, top 10 hold 34%, bundled?" value="${e?.devRisk||''}">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">Core Narrative — what is the market believing?</div>
+        <textarea id="f-narrativeCore" placeholder="The narrative driving attention and capital into this asset…">${e?.narrativeCore||''}</textarea>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">Why Now — what changed?</div>
+        <textarea id="f-whyNow" placeholder="The trigger that makes this a NOW trade…" rows="3">${e?.whyNow||''}</textarea>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">What Must Be True — for this thesis to play out</div>
+        <textarea id="f-mustBeTrue" placeholder="List the key assumptions. If X doesn't happen, this is wrong.">${e?.mustBeTrue||''}</textarea>
+      </div>
+      <div class="form-row cols2" style="margin-top:10px">
+        <div class="form-group">
+          <div class="field-label">KOL / Social Signal</div>
+          <textarea id="f-kol" placeholder="Who is posting, when did they start, follower reach…" rows="3">${e?.kol||''}</textarea>
+        </div>
+        <div class="form-group">
+          <div class="field-label">Upcoming Catalysts</div>
+          <textarea id="f-catalysts" placeholder="Events, unlocks, listings, narrative beats…" rows="3">${e?.catalysts||''}</textarea>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">My Edge — why do I have an advantage here?</div>
+        <textarea id="f-edge" placeholder="What do I see that isn't fully priced yet?" rows="3">${e?.edge||''}</textarea>
+      </div>
+
+      ${!isNew && e?.outcome !== 'open' ? `
+      <div class="sec-label" style="margin-top:20px">Post-Mortem</div>
+      <div class="form-group">
+        <div class="field-label">Did the narrative actually play out?</div>
+        <textarea id="f-pmNarrative" placeholder="Was the thesis right even if price was wrong?">${e?.pmNarrative||''}</textarea>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">Did price follow the narrative?</div>
+        <textarea id="f-pmPrice" placeholder="Analyze relationship between narrative and price action…">${e?.pmPrice||''}</textarea>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <div class="field-label">What did I miss?</div>
+        <textarea id="f-pmMiss" placeholder="The honest reflection — blind spot, wrong assumption, timing error…">${e?.pmMiss||''}</textarea>
+      </div>
+      ` : ''}
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveEntry(${isNew?'null':`'${e?.id}'`})">${isNew?'Save Entry':'Update Entry'}</button>
+      ${!isNew ? `<button class="btn-ghost" onclick="selectEntry('${e.id}')">Cancel</button>` : ''}
+      ${!isNew && e.outcome==='open' ? `<button class="btn btn-primary" style="background:var(--red);margin-left:8px" onclick="openExitModal('${e.id}')">Close Trade</button>` : ''}
+      ${!isNew ? `<button class="btn-danger" onclick="deleteEntry('${e.id}')">Delete</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function setFormMode(m) {
+  document.getElementById('mt-quick').classList.toggle('active', m==='quick');
+  document.getElementById('mt-full').classList.toggle('active', m==='full');
+  document.getElementById('form-quick').style.display = m==='quick'?'':'none';
+  document.getElementById('form-full').style.display = m==='full'?'':'none';
+}
+
+function tog(key, val, el, color) {
+  fs[key] = val;
+  const parent = el.parentElement;
+  parent.querySelectorAll('.tog').forEach(t => {
+    t.classList.remove('on');
+    t.style.background = '';
+    t.style.borderColor = '';
+    t.style.color = '';
+  });
+  el.classList.add('on');
+  el.style.background = color;
+  el.style.borderColor = color;
+  el.style.color = '#000';
+}
+
+function selectPhase(p, i) {
+  fs.phase = p;
+  PHASES.forEach((ph, idx) => {
+    const el = document.getElementById('pt-'+ph);
+    if (!el) return;
+    const on = ph===p;
+    el.classList.toggle('on', on);
+    el.style.background = on ? PCOLORS[idx] : '';
+    el.style.borderColor = on ? PCOLORS[idx] : '';
+    el.querySelector('.phase-tile-name').style.color = on ? '#000' : 'var(--text)';
+    el.querySelector('.phase-tile-sub').style.color = on ? 'rgba(0,0,0,0.6)' : '#888';
+  });
+}
+
+function gv(id) { const el=document.getElementById(id); return el?el.value.trim():''; }
+
+function saveEntry(id) {
+  const ticker = gv('f-ticker').toUpperCase();
+  if (!ticker) { document.getElementById('f-ticker').style.borderColor='var(--red)'; return; }
+
+  const existing = id ? db.find(e=>e.id===id) : null;
+
+  const entry = {
+    id: id||uid(),
+    createdAt: existing?.createdAt||new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ticker,
+    phase: fs.phase||'Emerging',
+    chain: fs.chain||'SOL',
+    direction: fs.direction||'Long',
+    source: fs.source||'Own Scan',
+    size: fs.size||'1×',
+    timescale: fs.timescale||'Days',
+    outcome: gv('f-outcome')||fs.outcome||'open',
+    mc: gv('f-mc'),
+    entry: gv('f-entry'),
+    exitTrigger: gv('f-exitTrigger'),
+    thesis1: gv('f-thesis1'),
+    devRisk: gv('f-devRisk'),
+    narrativeCore: gv('f-narrativeCore'),
+    whyNow: gv('f-whyNow'),
+    mustBeTrue: gv('f-mustBeTrue'),
+    kol: gv('f-kol'),
+    catalysts: gv('f-catalysts'),
+    edge: gv('f-edge'),
+    pmNarrative: gv('f-pmNarrative'),
+    pmPrice: gv('f-pmPrice'),
+    pmMiss: gv('f-pmMiss'),
+    exitPrice: existing?.exitPrice||'',
+    intactVerdict: existing?.intactVerdict||'',
+    exitPostmortem: existing?.exitPostmortem||'',
+  };
+
+  if (id) { const idx=db.findIndex(e=>e.id===id); db[idx]=entry; }
+  else db.push(entry);
+
+  save();
+  currentId = entry.id;
+  renderSidebar();
+  renderDetail(entry);
+}
+
+function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  db = db.filter(e=>e.id!==id);
+  currentId = null;
+  save();
+  renderSidebar();
+  showEmpty();
+}
+
+// ───── Detail ─────
+function renderDetail(e) {
+  const pi = PHASES.indexOf(e.phase);
+  const pc = PCOLORS[pi]||'var(--muted)';
+  document.getElementById('topbar-title').textContent = e.ticker||'Entry';
+
+  const fv = (label, val) => val ? `
+    <div class="field-view">
+      <div class="field-view-label">${label}</div>
+      <div class="field-view-body">${val}</div>
+    </div>` : '';
+
+  const intactColor = {'yes':'var(--green)','partial':'var(--yellow)','no':'var(--red)'}[e.intactVerdict]||'var(--muted)';
+  const intactLabel = {'yes':'Thesis intact','partial':'Partially intact','no':'Thesis was wrong'}[e.intactVerdict]||'';
+
+  document.getElementById('content').innerHTML = `
+  <div class="fade-in">
+    <div class="det-hero">
+      <div class="det-ticker">
+        <div class="pdot" style="background:${pc};width:10px;height:10px;border-radius:50%"></div>
+        ${e.ticker}
+        <span class="badge b-${e.outcome}">${e.outcome}</span>
+        ${e.direction !== 'Long' ? `<span style="font-size:13px;color:var(--muted);font-weight:400">${e.direction}</span>` : ''}
+        ${e.intactVerdict ? `<span style="font-size:11px;color:${intactColor};font-weight:600">${intactLabel}</span>` : ''}
+      </div>
+      <div class="det-sub">${fmtFull(e.createdAt)} · ${e.chain} · ${e.source} · ${e.size} size · ${e.timescale} narrative</div>
+
+      <div class="cycle-wrap">
+        <div class="cycle-bar">
+          ${PHASES.map((p,i)=>`<div class="cycle-seg ${e.phase===p?'on':''}" style="background:${PCOLORS[i]}"></div>`).join('')}
+        </div>
+        <div class="cycle-labels">
+          ${PHASES.map((p,i)=>`<div class="cycle-lbl ${e.phase===p?'on':''}" style="${e.phase===p?`color:${PCOLORS[i]}`:''}">${p}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="det-grid">
+      <div class="det-cell">
+        <div class="field-view-label">MC at Entry</div>
+        <div class="det-cell-val">${e.mc||'—'}</div>
+      </div>
+      <div class="det-cell">
+        <div class="field-view-label">Entry</div>
+        <div class="det-cell-val">${e.entry||'—'}</div>
+      </div>
+      <div class="det-cell">
+        <div class="field-view-label">Exit</div>
+        <div class="det-cell-val" style="color:${e.outcome==='win'?'var(--green)':e.outcome==='loss'?'var(--red)':'var(--muted)'}">${e.exitPrice||'—'}</div>
+      </div>
+      <div class="det-cell">
+        <div class="field-view-label">Dev Risk</div>
+        <div class="det-cell-val" style="font-size:11px">${e.devRisk||'—'}</div>
+      </div>
+      <div class="det-cell">
+        <div class="field-view-label">Conviction</div>
+        <div class="det-cell-val" style="color:var(--orange)">${e.size||'—'}</div>
+      </div>
+      <div class="det-cell">
+        <div class="field-view-label">Timescale</div>
+        <div class="det-cell-val">${e.timescale||'—'}</div>
+      </div>
+    </div>
+
+    ${e.thesis1 ? `
+    <div style="background:var(--s2);border-left:3px solid ${pc};padding:12px 16px;margin-bottom:20px;font-size:13px;line-height:1.7">
+      ${e.thesis1}
+    </div>` : ''}
+
+    ${e.exitTrigger ? `
+    <div style="background:var(--s2);border-left:3px solid var(--red);padding:12px 16px;margin-bottom:20px;font-size:12px;line-height:1.7;color:var(--muted)">
+      <span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);display:block;margin-bottom:4px">Exit Trigger</span>
+      ${e.exitTrigger}
+    </div>` : ''}
+
+    ${e.narrativeCore||e.whyNow||e.mustBeTrue ? `
+      <div class="sec-label">Thesis</div>
+      ${fv('Core Narrative', e.narrativeCore)}
+      ${fv('Why Now', e.whyNow)}
+      ${fv('What Must Be True', e.mustBeTrue)}
+    ` : ''}
+
+    ${e.kol||e.catalysts||e.edge ? `
+      <div class="sec-label">Intelligence</div>
+      ${fv('KOL / Social Signal', e.kol)}
+      ${fv('Upcoming Catalysts', e.catalysts)}
+      ${fv('My Edge', e.edge)}
+    ` : ''}
+
+    ${e.exitPostmortem||e.pmNarrative||e.pmPrice||e.pmMiss ? `
+      <div class="sec-label">Post-Mortem</div>
+      ${e.exitPostmortem ? fv('What actually happened', e.exitPostmortem) : ''}
+      ${fv('Did narrative play out?', e.pmNarrative)}
+      ${fv('Did price follow narrative?', e.pmPrice)}
+      ${fv('What did I miss?', e.pmMiss)}
+    ` : ''}
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="editEntry('${e.id}')">Edit</button>
+      ${e.outcome==='open' ? `<button class="btn btn-primary" style="background:var(--red)" onclick="openExitModal('${e.id}')">Close Trade</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function editEntry(id) {
+  const e = db.find(x=>x.id===id);
+  document.getElementById('topbar-title').textContent = `Edit — ${e.ticker}`;
+  renderForm(e);
+}
+
+// ───── Exit modal ─────
+function openExitModal(id) {
+  _exitId = id;
+  _intactVal = null;
+  const e = db.find(x=>x.id===id);
+  const preview = e.mustBeTrue || e.thesis1 || e.narrativeCore || '(No thesis recorded)';
+  document.getElementById('exit-thesis-preview').textContent = preview;
+  document.getElementById('exit-postmortem').value = '';
+  document.getElementById('exit-price').value = '';
+  document.getElementById('exit-outcome').value = 'win';
+  document.querySelectorAll('.intact-opt').forEach(el=>el.classList.remove('on'));
+  document.getElementById('exit-modal').style.display = 'flex';
+}
+
+function setIntact(v) {
+  _intactVal = v;
+  document.querySelectorAll('.intact-opt').forEach(el=>el.classList.remove('on'));
+  event.currentTarget.classList.add('on');
+}
+
+function closeModal() {
+  document.getElementById('exit-modal').style.display = 'none';
+  _exitId = null; _intactVal = null;
+}
+
+function confirmExit() {
+  if (!_exitId) return;
+  const idx = db.findIndex(e=>e.id===_exitId);
+  if (idx<0) return;
+  db[idx].outcome = document.getElementById('exit-outcome').value;
+  db[idx].exitPrice = document.getElementById('exit-price').value;
+  db[idx].intactVerdict = _intactVal||'';
+  db[idx].exitPostmortem = document.getElementById('exit-postmortem').value;
+  db[idx].closedAt = new Date().toISOString();
+  save();
+  closeModal();
+  renderSidebar();
+  renderDetail(db[idx]);
+}
+
+// ───── Stats ─────
+function renderStats() {
+  document.getElementById('topbar-title').textContent = 'Statistics';
+  const total = db.length;
+  const wins = db.filter(e=>e.outcome==='win').length;
+  const losses = db.filter(e=>e.outcome==='loss').length;
+  const open = db.filter(e=>e.outcome==='open').length;
+  const closed = wins+losses;
+  const wr = closed>0?Math.round(wins/closed*100):0;
+
+  // by phase
+  const byPhase = PHASES.map(p => {
+    const trades = db.filter(e=>e.phase===p);
+    const w = trades.filter(e=>e.outcome==='win').length;
+    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
+    return { phase:p, total:trades.length, wr:c>0?Math.round(w/c*100):null };
+  });
+
+  // by source
+  const bySrc = SOURCES.map(s => {
+    const trades = db.filter(e=>e.source===s);
+    const w = trades.filter(e=>e.outcome==='win').length;
+    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
+    return { source:s, total:trades.length, wr:c>0?Math.round(w/c*100):null };
+  }).filter(x=>x.total>0);
+
+  // by timescale
+  const byTs = TIMESCALES.map(t => {
+    const trades = db.filter(e=>e.timescale===t);
+    const w = trades.filter(e=>e.outcome==='win').length;
+    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
+    return { ts:t, total:trades.length, wr:c>0?Math.round(w/c*100):null };
+  }).filter(x=>x.total>0);
+
+  // thesis intact
+  const withVerdict = db.filter(e=>e.intactVerdict);
+  const intactYes = withVerdict.filter(e=>e.intactVerdict==='yes').length;
+  const intactNo = withVerdict.filter(e=>e.intactVerdict==='no').length;
+  const intactPartial = withVerdict.filter(e=>e.intactVerdict==='partial').length;
+
+  // by size
+  const bySize = SIZES.map(s => {
+    const trades = db.filter(e=>e.size===s);
+    const w = trades.filter(e=>e.outcome==='win').length;
+    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
+    return { size:s, total:trades.length, wr:c>0?Math.round(w/c*100):null };
+  }).filter(x=>x.total>0);
+
+  const tableRows = (rows, keyLabel, keyField, color='var(--accent)') => `
+    <table class="stats-table">
+      <thead><tr><th>${keyLabel}</th><th>Trades</th><th>Win Rate</th><th></th></tr></thead>
+      <tbody>
+        ${rows.map(r=>`
+          <tr>
+            <td style="font-family:var(--fh);font-weight:700">${r[keyField]}</td>
+            <td>${r.total}</td>
+            <td style="color:${r.wr!==null?(r.wr>=50?'var(--green)':'var(--red)'):'var(--muted)'}">${r.wr!==null?r.wr+'%':'—'}</td>
+            <td style="width:80px">
+              ${r.wr!==null?`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${r.wr}%;background:${color}"></div></div></div>`:''}
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  document.getElementById('content').innerHTML = `
+  <div class="fade-in">
+    <div class="stats-main">
+      <div class="stat-card"><div class="field-view-label">Total Entries</div><div class="stat-card-val" style="color:var(--accent)">${total}</div></div>
+      <div class="stat-card"><div class="field-view-label">Win Rate</div><div class="stat-card-val" style="color:var(--green)">${wr}%</div></div>
+      <div class="stat-card"><div class="field-view-label">Open</div><div class="stat-card-val" style="color:var(--yellow)">${open}</div></div>
+      <div class="stat-card"><div class="field-view-label">W / L</div><div class="stat-card-val">${wins} <span style="color:var(--muted);font-size:16px">/</span> ${losses}</div></div>
+    </div>
+
+    ${withVerdict.length > 0 ? `
+    <div class="sec-label">Thesis Integrity</div>
+    <div style="display:flex;gap:1px;background:var(--b1);border:1px solid var(--b1);margin-bottom:24px">
+      <div class="stat-card" style="flex:1"><div class="field-view-label">Intact</div><div class="stat-card-val" style="color:var(--green)">${intactYes}</div></div>
+      <div class="stat-card" style="flex:1"><div class="field-view-label">Partial</div><div class="stat-card-val" style="color:var(--yellow)">${intactPartial}</div></div>
+      <div class="stat-card" style="flex:1"><div class="field-view-label">Wrong</div><div class="stat-card-val" style="color:var(--red)">${intactNo}</div></div>
+    </div>` : ''}
+
+    <div class="stats-row-grid">
+      ${byPhase.some(x=>x.total>0) ? `
+      <div class="stats-table-wrap">
+        <div class="sec-label" style="margin-top:0">Win Rate by Narrative Phase</div>
+        ${tableRows(byPhase.filter(x=>x.total>0), 'Phase', 'phase', 'var(--accent)')}
+      </div>` : ''}
+      ${bySrc.length ? `
+      <div class="stats-table-wrap">
+        <div class="sec-label" style="margin-top:0">Win Rate by Source</div>
+        ${tableRows(bySrc, 'Source', 'source', 'var(--purple)')}
+      </div>` : ''}
+      ${byTs.length ? `
+      <div class="stats-table-wrap">
+        <div class="sec-label" style="margin-top:0">Win Rate by Timescale</div>
+        ${tableRows(byTs, 'Timescale', 'ts', 'var(--green)')}
+      </div>` : ''}
+      ${bySize.length ? `
+      <div class="stats-table-wrap">
+        <div class="sec-label" style="margin-top:0">Win Rate by Position Size</div>
+        ${tableRows(bySize, 'Size', 'size', 'var(--orange)')}
+      </div>` : ''}
+    </div>
+
+    ${db.length > 0 ? `
+    <div class="sec-label">All Entries</div>
+    <div class="stats-table-wrap">
+      <table class="stats-table" style="width:100%">
+        <thead><tr><th>Ticker</th><th>Chain</th><th>Phase</th><th>Source</th><th>Size</th><th>MC</th><th>Outcome</th><th>Date</th></tr></thead>
+        <tbody>
+          ${db.slice().reverse().map(e=>`
+            <tr style="cursor:pointer" onclick="selectEntry('${e.id}');switchView('journal')">
+              <td style="font-family:var(--fh);font-weight:700">${e.ticker}</td>
+              <td>${e.chain||'—'}</td>
+              <td style="color:${PCOLORS[PHASES.indexOf(e.phase)]||'var(--muted)'}">${e.phase||'—'}</td>
+              <td>${e.source||'—'}</td>
+              <td style="color:var(--orange)">${e.size||'—'}</td>
+              <td style="color:var(--muted)">${e.mc||'—'}</td>
+              <td><span class="badge b-${e.outcome}">${e.outcome}</span></td>
+              <td style="color:var(--muted)">${fmt(e.createdAt)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+  </div>`;
+}
+
+// ───── Init ─────
+renderSidebar();
+if (!db.length) {
+  document.getElementById('content').innerHTML = `
+    <div class="empty fade-in">
+      <div class="empty-glyph">∅</div>
+      <div style="font-family:var(--fh);font-weight:700;color:var(--text)">No entries yet.</div>
+      <div style="font-size:11px;max-width:260px;margin-top:4px">Every trade starts with a narrative.<br>Start capturing yours.</div>
+      <button class="btn btn-primary" onclick="startNewEntry()" style="margin-top:12px">New Entry</button>
+    </div>`;
+}
+</script>
+</body>
+</html>
