@@ -902,12 +902,22 @@ function showTrackerEmpty() {
 }
 
 function newTrackerEntry() {
-  goTo('tracker');
   currentEntryId=null;
   _fs={phase:'Emerging',chain:'SOL',source:'Own Scan',size:'1×',direction:'Long',timescale:'Days',outcome:'open'};
   _conviction=null; _phase=null;
-  document.getElementById('topbar-title').textContent='New Entry';
+  // Switch view — goTo will call showTrackerEmpty since currentEntryId is null
+  // We then immediately override with the form
+  currentView='tracker';
+  ['scanner','tracker','backtest','stats'].forEach(v=>{
+    document.getElementById('rb-'+v).classList.toggle('active',v==='tracker');
+  });
+  document.getElementById('tracker-sidebar').classList.remove('hidden');
+  document.getElementById('scan-btn').style.display='none';
+  document.getElementById('keys-btn').style.display='none';
+  document.getElementById('scan-time').style.display='none';
+  document.getElementById('settings-panel').classList.remove('open');
   renderTrackerSidebar();
+  document.getElementById('topbar-title').textContent='New Entry';
   renderForm(null);
 }
 
