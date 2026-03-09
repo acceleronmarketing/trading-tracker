@@ -3,21 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thesis — v2</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<title>Thesis OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
+/* ── Reset & vars ── */
 :root {
-  --bg: #080808;
-  --s1: #111111;
-  --s2: #1a1a1a;
-  --s3: #222222;
-  --b1: #2a2a2a;
-  --b2: #383838;
-  --b3: #484848;
-  --text: #f0f0f0;
-  --muted: #888888;
-  --muted2: #606060;
-  --accent: #d4f54e;
+  --bg: #080809;
+  --s1: #0f0f11;
+  --s2: #181820;
+  --s3: #1f1f28;
+  --b1: #2a2a38;
+  --b2: #38384a;
+  --b3: #484860;
+  --text: #f0f0f4;
+  --muted: #888899;
+  --dim: #555566;
+  --accent: #c8f050;
   --green: #4ef5a0;
   --red: #f5504e;
   --orange: #f5954e;
@@ -28,257 +29,372 @@
   --fm: 'IBM Plex Mono', monospace;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; }
-body { background:var(--bg); color:var(--text); font-family:var(--fm); font-size:12px; line-height:1.6; overflow:hidden; }
+html,body { height:100%; overflow:hidden; }
+body { background:var(--bg); color:var(--text); font-family:var(--fm); font-size:12px; line-height:1.6; }
 
-/* ── Layout ── */
-.shell { display:flex; height:100vh; }
-.rail { width:52px; background:var(--s1); border-right:1px solid var(--b1); display:flex; flex-direction:column; align-items:center; padding:16px 0; gap:4px; flex-shrink:0; }
-.sidebar { width:240px; background:var(--s1); border-right:1px solid var(--b1); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; }
-.main { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+/* ── App shell ── */
+.app { display:flex; height:100vh; }
 
-/* ── Rail ── */
-.rail-btn { width:36px; height:36px; background:none; border:none; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition:color 0.15s; border-radius:4px; position:relative; }
-.rail-btn:hover, .rail-btn.active { color:var(--text); background:var(--s2); }
-.rail-btn.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:2px; height:20px; background:var(--accent); border-radius:0 2px 2px 0; }
-.rail-sep { width:24px; height:1px; background:var(--b1); margin:6px 0; }
-.rail-logo { font-family:var(--fh); font-size:11px; font-weight:800; color:var(--accent); writing-mode:vertical-rl; text-orientation:mixed; letter-spacing:0.12em; margin-bottom:12px; }
+/* ── Left rail ── */
+.rail {
+  width:48px; background:var(--s1); border-right:1px solid var(--b1);
+  display:flex; flex-direction:column; align-items:center;
+  padding:12px 0; gap:2px; flex-shrink:0; z-index:20;
+}
+.rail-logo {
+  font-family:var(--fh); font-size:10px; font-weight:800; color:var(--accent);
+  writing-mode:vertical-rl; letter-spacing:0.14em; margin-bottom:14px;
+}
+.rail-btn {
+  width:34px; height:34px; background:none; border:none; color:var(--muted);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:15px; transition:all 0.15s; border-radius:3px; position:relative;
+  flex-direction:column; gap:2px;
+}
+.rail-btn:hover { color:var(--text); background:var(--s2); }
+.rail-btn.active { color:var(--text); background:var(--s2); }
+.rail-btn.active::before {
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:2px; height:18px; background:var(--accent); border-radius:0 2px 2px 0;
+}
+.rail-lbl { font-size:7px; letter-spacing:0.06em; text-transform:uppercase; color:inherit; line-height:1; }
+.rail-sep { width:20px; height:1px; background:var(--b1); margin:4px 0; }
+.rail-new {
+  margin-top:auto; width:34px; height:34px; background:var(--accent); color:#000;
+  border:none; cursor:pointer; font-size:18px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.15s; border-radius:3px;
+}
+.rail-new:hover { background:#d8ff60; }
 
-/* ── Sidebar ── */
-.sb-top { padding:16px 14px 10px; border-bottom:1px solid var(--b1); }
-.sb-search { width:100%; background:var(--s2); border:1px solid var(--b1); color:var(--text); font-family:var(--fm); font-size:11px; padding:7px 10px; outline:none; }
+/* ── Sidebar (tracker only) ── */
+.sidebar {
+  width:230px; background:var(--s1); border-right:1px solid var(--b1);
+  display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;
+  transition:width 0.2s ease;
+}
+.sidebar.hidden { width:0; }
+.sb-top { padding:14px 12px 10px; border-bottom:1px solid var(--b1); flex-shrink:0; }
+.sb-search {
+  width:100%; background:var(--s2); border:1px solid var(--b1); color:var(--text);
+  font-family:var(--fm); font-size:11px; padding:6px 10px; outline:none;
+}
 .sb-search:focus { border-color:var(--accent); }
 .sb-list { flex:1; overflow-y:auto; }
 .sb-list::-webkit-scrollbar { width:2px; }
 .sb-list::-webkit-scrollbar-thumb { background:var(--b2); }
-
-.sb-item { padding:10px 14px; cursor:pointer; border-left:2px solid transparent; transition:all 0.1s; }
+.sb-item { padding:9px 12px; cursor:pointer; border-left:2px solid transparent; transition:all 0.1s; }
 .sb-item:hover { background:var(--s2); }
 .sb-item.active { background:var(--s2); border-left-color:var(--accent); }
-.sb-item-top { display:flex; align-items:center; gap:7px; }
+.sb-item-top { display:flex; align-items:center; gap:6px; }
 .sb-ticker { font-family:var(--fh); font-size:13px; font-weight:700; }
-.sb-badges { display:flex; gap:4px; margin-left:auto; align-items:center; }
-.sb-meta { font-size:10px; color:#888; margin-top:2px; display:flex; gap:8px; }
+.sb-badges { margin-left:auto; }
+.sb-meta { font-size:10px; color:var(--muted); margin-top:2px; display:flex; gap:6px; }
+
+/* ── Main area ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
 
 /* ── Topbar ── */
-.topbar { height:48px; border-bottom:1px solid var(--b1); display:flex; align-items:center; padding:0 24px; gap:16px; background:var(--s1); flex-shrink:0; }
-.topbar-title { font-family:var(--fh); font-size:15px; font-weight:800; letter-spacing:-0.3px; }
+.topbar {
+  height:46px; border-bottom:1px solid var(--b1); display:flex; align-items:center;
+  padding:0 20px; gap:14px; background:var(--s1); flex-shrink:0;
+}
+.topbar-title { font-family:var(--fh); font-size:14px; font-weight:800; letter-spacing:-0.3px; }
 .topbar-right { margin-left:auto; display:flex; gap:8px; align-items:center; }
-.topbar-stat { text-align:right; }
-.topbar-stat-val { font-family:var(--fh); font-size:14px; font-weight:700; line-height:1; }
-.topbar-stat-label { font-size:9px; color:#999; letter-spacing:0.08em; text-transform:uppercase; }
-.topbar-divider { width:1px; height:24px; background:var(--b1); }
+.topbar-stat-val { font-family:var(--fh); font-size:13px; font-weight:700; line-height:1; }
+.topbar-stat-label { font-size:9px; color:var(--muted); letter-spacing:0.07em; text-transform:uppercase; }
+.topbar-divider { width:1px; height:22px; background:var(--b1); }
 
 /* ── Content ── */
-.content { flex:1; overflow-y:auto; padding:24px 28px; }
-.content::-webkit-scrollbar { width:3px; }
-.content::-webkit-scrollbar-thumb { background:var(--b2); }
+.content-wrap { flex:1; overflow-y:auto; }
+.content-wrap::-webkit-scrollbar { width:3px; }
+.content-wrap::-webkit-scrollbar-thumb { background:var(--b2); }
+.content { padding:22px 26px; }
 
-/* ── Mode tabs ── */
-.mode-tabs { display:flex; gap:2px; background:var(--s2); border:1px solid var(--b1); padding:3px; margin-bottom:20px; width:fit-content; }
-.mode-tab { padding:5px 14px; font-family:var(--fh); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; color:var(--muted); border:none; background:none; transition:all 0.15s; }
-.mode-tab.active { background:var(--accent); color:#000; }
-
-/* ── Quick Capture ── */
-.qc-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:8px; }
-.qc-group { display:flex; flex-direction:column; gap:5px; }
-.qc-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; }
-
-/* Toggle group */
-.tog-group { display:flex; gap:2px; }
-.tog { flex:1; background:var(--s2); border:1px solid var(--b2); color:#aaa; padding:7px 4px; font-family:var(--fm); font-size:10px; cursor:pointer; text-align:center; transition:all 0.12s; white-space:nowrap; }
-.tog:hover { color:var(--text); }
-.tog.on { color:#000 !important; font-weight:600; }
-
-/* inputs */
-input, textarea, select {
+/* ── Shared inputs ── */
+input[type=text], input[type=password], textarea, select {
   background:var(--s2); border:1px solid var(--b2); color:var(--text);
   font-family:var(--fm); font-size:12px; padding:7px 10px; outline:none;
   width:100%; transition:border-color 0.15s;
 }
 input:focus, textarea:focus, select:focus { border-color:var(--accent); }
-textarea { resize:vertical; min-height:72px; }
+textarea { resize:vertical; min-height:72px; line-height:1.6; }
 select option { background:var(--s2); }
-input::placeholder, textarea::placeholder { color:#666; }
+input::placeholder, textarea::placeholder { color:var(--dim); }
 
-/* ── Section ── */
-.sec-label { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:#999; margin:20px 0 10px; display:flex; align-items:center; gap:8px; }
+/* ── Buttons ── */
+.btn { padding:8px 18px; font-family:var(--fh); font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; cursor:pointer; border:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
+.btn-sm { padding:5px 12px; font-size:10px; }
+.btn-primary { background:var(--accent); color:#000; }
+.btn-primary:hover { background:#d8ff60; }
+.btn-primary:disabled { background:var(--b2); color:var(--dim); cursor:not-allowed; }
+.btn-ghost { background:none; border:1px solid var(--b2); color:var(--muted); font-family:var(--fm); font-size:11px; padding:8px 14px; cursor:pointer; transition:all 0.15s; }
+.btn-ghost:hover { border-color:var(--muted); color:var(--text); }
+.btn-danger { background:none; border:1px solid transparent; color:var(--red); font-family:var(--fm); font-size:11px; padding:8px 12px; cursor:pointer; transition:all 0.15s; margin-left:auto; }
+.btn-danger:hover { border-color:var(--red); }
+.btn-row { display:flex; gap:8px; align-items:center; margin-top:22px; padding-top:18px; border-top:1px solid var(--b1); }
+
+/* ── Labels / sections ── */
+.sec-label { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin:18px 0 10px; display:flex; align-items:center; gap:8px; }
 .sec-label::after { content:''; flex:1; height:1px; background:var(--b1); }
-.form-row { display:grid; gap:10px; margin-bottom:10px; }
-.form-row.cols2 { grid-template-columns:1fr 1fr; }
-.form-row.cols3 { grid-template-columns:1fr 1fr 1fr; }
-.form-group { display:flex; flex-direction:column; gap:5px; }
 .field-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; }
-
-/* ── Phase picker ── */
-.phase-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
-.phase-tile { background:var(--s2); border:1px solid var(--b1); padding:8px 6px; text-align:center; cursor:pointer; transition:all 0.12s; }
-.phase-tile-name { font-size:10px; font-weight:600; letter-spacing:0.04em; }
-.phase-tile-sub { font-size:9px; color:#888; margin-top:2px; }
-.phase-tile.on .phase-tile-sub { color:rgba(0,0,0,0.6); }
+.form-row { display:grid; gap:10px; margin-bottom:10px; }
+.form-row.c2 { grid-template-columns:1fr 1fr; }
+.form-row.c3 { grid-template-columns:1fr 1fr 1fr; }
+.form-row.c4 { grid-template-columns:repeat(4,1fr); }
+.form-group { display:flex; flex-direction:column; gap:5px; }
 
 /* ── Badges ── */
 .badge { font-size:9px; padding:2px 6px; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; border:1px solid; display:inline-block; }
 .b-open { color:var(--yellow); border-color:var(--yellow); }
-.b-win { color:var(--green); border-color:var(--green); }
-.b-loss { color:var(--red); border-color:var(--red); }
-.b-miss { color:var(--muted); border-color:var(--muted2); }
-.b-watch { color:var(--blue); border-color:var(--blue); }
+.b-win  { color:var(--green);  border-color:var(--green); }
+.b-loss { color:var(--red);    border-color:var(--red); }
+.b-miss { color:var(--muted);  border-color:var(--b2); }
+.pdot { width:6px; height:6px; border-radius:50%; flex-shrink:0; display:inline-block; }
 
-/* phase dots */
-.pdot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+/* ── Toggle groups ── */
+.tog-group { display:flex; gap:2px; flex-wrap:wrap; }
+.tog { flex:1; background:var(--s2); border:1px solid var(--b2); color:#aaa; padding:6px 4px; font-family:var(--fm); font-size:10px; cursor:pointer; text-align:center; transition:all 0.12s; white-space:nowrap; min-width:36px; }
+.tog:hover { color:var(--text); }
+.tog.on { color:#000 !important; font-weight:600; }
 
-/* ── Buttons ── */
-.btn { padding:9px 20px; font-family:var(--fh); font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; cursor:pointer; border:none; transition:all 0.15s; }
-.btn-primary { background:var(--accent); color:#000; }
-.btn-primary:hover { background:#e2ff60; }
-.btn-ghost { background:none; border:1px solid var(--b2); color:var(--muted); font-family:var(--fm); font-size:11px; padding:9px 16px; cursor:pointer; transition:all 0.15s; }
-.btn-ghost:hover { color:var(--text); border-color:var(--muted); }
-.btn-danger { background:none; border:1px solid transparent; color:var(--red); font-family:var(--fm); font-size:11px; padding:9px 12px; cursor:pointer; transition:all 0.15s; margin-left:auto; }
-.btn-danger:hover { border-color:var(--red); }
-.btn-row { display:flex; gap:8px; align-items:center; margin-top:24px; padding-top:20px; border-top:1px solid var(--b1); }
+/* ── Mode tabs ── */
+.mode-tabs { display:flex; gap:2px; background:var(--s2); border:1px solid var(--b1); padding:3px; margin-bottom:18px; width:fit-content; }
+.mode-tab { padding:5px 14px; font-family:var(--fh); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; color:var(--muted); border:none; background:none; transition:all 0.15s; }
+.mode-tab.active { background:var(--accent); color:#000; }
 
-/* ── Detail view ── */
-.det-hero { margin-bottom:20px; }
-.det-ticker { font-family:var(--fh); font-size:32px; font-weight:800; letter-spacing:-1px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.det-sub { font-size:10px; color:var(--muted); margin-top:6px; letter-spacing:0.06em; }
-.det-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:1px; background:var(--b1); border:1px solid var(--b1); margin:16px 0 20px; }
-.det-cell { background:var(--s2); padding:12px 14px; }
-.det-cell-val { font-family:var(--fh); font-size:14px; font-weight:700; margin-top:3px; }
-.field-view { margin-bottom:18px; }
+/* ── Phase picker ── */
+.phase-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+.phase-tile { background:var(--s2); border:1px solid var(--b1); padding:8px 4px; text-align:center; cursor:pointer; transition:all 0.12s; }
+.phase-tile-name { font-size:10px; font-weight:600; }
+.phase-tile-sub { font-size:9px; color:#888; margin-top:1px; }
+
+/* ── Tracker detail ── */
+.det-ticker { font-family:var(--fh); font-size:28px; font-weight:800; letter-spacing:-0.8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.det-sub { font-size:10px; color:var(--muted); margin-top:5px; }
+.det-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:1px; background:var(--b1); border:1px solid var(--b1); margin:14px 0 18px; }
+.det-cell { background:var(--s2); padding:10px 12px; }
+.det-cell-val { font-family:var(--fh); font-size:13px; font-weight:700; margin-top:2px; }
+.field-view { margin-bottom:16px; }
 .field-view-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; margin-bottom:6px; }
-.field-view-body { color:var(--text); line-height:1.8; border-left:2px solid var(--b2); padding-left:12px; }
-
-/* ── Cycle bar ── */
-.cycle-wrap { margin:10px 0; }
-.cycle-bar { display:flex; gap:3px; height:3px; }
-.cycle-seg { flex:1; border-radius:2px; opacity:0.2; transition:opacity 0.2s; }
+.field-view-body { color:var(--text); line-height:1.8; border-left:2px solid var(--b2); padding-left:12px; font-size:12px; }
+.cycle-bar { display:flex; gap:3px; height:3px; margin:10px 0 4px; }
+.cycle-seg { flex:1; border-radius:2px; opacity:0.2; }
 .cycle-seg.on { opacity:1; }
-.cycle-labels { display:flex; margin-top:5px; }
+.cycle-labels { display:flex; }
 .cycle-lbl { flex:1; font-size:9px; color:#777; }
 .cycle-lbl.on { color:var(--text); }
 
 /* ── Pre-exit modal ── */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:100; }
-.modal { background:var(--s1); border:1px solid var(--b2); padding:28px; max-width:480px; width:90%; }
-.modal-title { font-family:var(--fh); font-size:18px; font-weight:800; margin-bottom:6px; }
-.modal-sub { color:var(--muted); font-size:11px; margin-bottom:20px; line-height:1.7; }
-.thesis-preview { background:var(--s2); border-left:3px solid var(--accent); padding:12px 14px; margin-bottom:20px; font-size:11px; line-height:1.8; color:var(--text); }
-.intact-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:16px; }
-.intact-opt { background:var(--s2); border:1px solid var(--b2); padding:12px 8px; text-align:center; cursor:pointer; transition:all 0.15s; }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:100; }
+.modal { background:var(--s1); border:1px solid var(--b2); padding:26px; max-width:460px; width:90%; }
+.modal-title { font-family:var(--fh); font-size:17px; font-weight:800; margin-bottom:5px; }
+.modal-sub { color:var(--muted); font-size:11px; margin-bottom:18px; line-height:1.7; }
+.thesis-preview { background:var(--s2); border-left:3px solid var(--accent); padding:10px 14px; margin-bottom:18px; font-size:11px; line-height:1.8; }
+.intact-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:14px; }
+.intact-opt { background:var(--s2); border:1px solid var(--b2); padding:10px 6px; text-align:center; cursor:pointer; transition:all 0.15s; }
 .intact-opt:hover { border-color:var(--muted); }
-.intact-opt.on { border-color:var(--accent); background:rgba(212,245,78,0.08); }
-.intact-opt-icon { font-size:20px; margin-bottom:4px; }
+.intact-opt.on { border-color:var(--accent); background:rgba(200,240,80,0.07); }
+.intact-opt-icon { font-size:18px; margin-bottom:3px; }
 .intact-opt-label { font-family:var(--fh); font-size:11px; font-weight:700; }
-.intact-opt-sub { font-size:9px; color:#888; margin-top:2px; }
+.intact-opt-sub { font-size:9px; color:var(--muted); margin-top:2px; }
 
-/* ── Stats ── */
-.stats-main { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--b1); border:1px solid var(--b1); margin-bottom:24px; }
-.stat-card { background:var(--s2); padding:16px 18px; }
-.stat-card-val { font-family:var(--fh); font-size:24px; font-weight:800; margin-top:4px; letter-spacing:-0.5px; }
-.stats-row-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
-.stats-table-wrap { background:var(--s2); border:1px solid var(--b1); padding:16px; }
+/* ── Scanner ── */
+.scan-controls { display:flex; align-items:center; gap:10px; margin-bottom:20px; padding:12px 16px; background:var(--s1); border:1px solid var(--b1); flex-wrap:wrap; }
+.ctrl-label { font-size:9px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; flex-shrink:0; }
+.filter-tog { background:var(--s2); border:1px solid var(--b1); color:var(--muted); padding:4px 10px; font-family:var(--fm); font-size:10px; cursor:pointer; transition:all 0.12s; }
+.filter-tog:hover { color:var(--text); }
+.filter-tog.on { background:var(--s3); border-color:var(--b2); color:var(--text); }
+.dv { width:1px; height:20px; background:var(--b1); flex-shrink:0; }
+.scan-status { display:none; align-items:center; gap:10px; padding:10px 16px; margin-bottom:14px; background:var(--s1); border-left:2px solid var(--accent); font-size:11px; color:var(--muted); }
+.scan-status.on { display:flex; }
+.pulse { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1s infinite; flex-shrink:0; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.prog-wrap { flex:1; height:2px; background:var(--b1); border-radius:1px; overflow:hidden; }
+.prog-fill { height:100%; background:var(--accent); border-radius:1px; transition:width 0.3s; width:0%; }
+
+/* ── Token cards ── */
+.tokens-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:14px; }
+.token-card { background:var(--s1); border:1px solid var(--b1); transition:border-color 0.2s,transform 0.2s; animation:cardIn 0.25s ease both; position:relative; overflow:hidden; }
+.token-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--card-c,var(--accent)); }
+.token-card:hover { border-color:var(--b2); transform:translateY(-1px); }
+@keyframes cardIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.card-header { padding:14px 14px 10px; display:flex; align-items:flex-start; gap:10px; border-bottom:1px solid var(--b1); }
+.card-rank { font-family:var(--fh); font-size:11px; font-weight:800; color:var(--card-c,var(--accent)); opacity:0.7; width:20px; flex-shrink:0; padding-top:2px; }
+.card-ticker-wrap { flex:1; min-width:0; }
+.card-ticker { font-family:var(--fh); font-size:17px; font-weight:800; letter-spacing:-0.4px; line-height:1; }
+.card-name { font-size:10px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card-chain { font-size:9px; padding:2px 6px; border:1px solid var(--b2); color:var(--muted); letter-spacing:0.06em; text-transform:uppercase; flex-shrink:0; }
+.score-ring { width:40px; height:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border:2px solid var(--card-c,var(--accent)); flex-direction:column; }
+.score-val { font-family:var(--fh); font-size:13px; font-weight:800; line-height:1; }
+.score-lbl { font-size:8px; color:var(--muted); letter-spacing:0.06em; }
+.card-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--b1); border-bottom:1px solid var(--b1); }
+.metric { background:var(--s2); padding:7px 8px; }
+.metric-val { font-family:var(--fh); font-size:11px; font-weight:700; line-height:1; margin-top:2px; }
+.metric-lbl { font-size:8px; color:#888; letter-spacing:0.06em; text-transform:uppercase; }
+.card-signals { padding:8px 14px; display:flex; flex-wrap:wrap; gap:4px; border-bottom:1px solid var(--b1); min-height:34px; }
+.signal { font-size:9px; padding:2px 6px; border:1px solid; letter-spacing:0.04em; }
+.sg { color:var(--green); border-color:rgba(78,245,160,0.3); }
+.sy { color:var(--yellow); border-color:rgba(245,212,78,0.3); }
+.sr { color:var(--red); border-color:rgba(245,80,78,0.3); }
+.sb { color:var(--blue); border-color:rgba(78,168,245,0.3); }
+.sp { color:var(--purple); border-color:rgba(160,78,245,0.3); }
+.card-thesis { padding:12px 14px; }
+.thesis-lbl { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.thesis-lbl::after { content:''; flex:1; height:1px; background:var(--b1); }
+.thesis-text { font-size:11px; color:#ccc; line-height:1.8; }
+.card-actions { padding:8px 14px; display:flex; gap:6px; border-top:1px solid var(--b1); align-items:center; }
+.card-link { font-size:10px; color:var(--muted); text-decoration:none; padding:3px 7px; border:1px solid var(--b1); transition:all 0.15s; }
+.card-link:hover { color:var(--text); border-color:var(--b2); }
+
+/* ── Settings ── */
+.settings-panel { background:var(--s1); border-bottom:1px solid var(--b1); padding:0 26px; overflow:hidden; max-height:0; transition:max-height 0.3s,padding 0.3s; }
+.settings-panel.open { max-height:260px; padding:16px 26px; }
+.settings-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.setting-group { display:flex; flex-direction:column; gap:5px; }
+.setting-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; }
+
+/* ── Stats / Backtest ── */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--b1); border:1px solid var(--b1); margin-bottom:22px; }
+.stat-card { background:var(--s2); padding:14px 16px; }
+.stat-val { font-family:var(--fh); font-size:22px; font-weight:800; margin-top:4px; letter-spacing:-0.5px; }
+.stats-row-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px; }
+.stats-table-wrap { background:var(--s2); border:1px solid var(--b1); padding:14px; }
 .stats-table { width:100%; border-collapse:collapse; }
-.stats-table th { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-align:left; padding:6px 10px; border-bottom:1px solid var(--b1); font-weight:400; }
+.stats-table th { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; text-align:left; padding:6px 10px; border-bottom:1px solid var(--b1); font-weight:400; }
 .stats-table td { padding:8px 10px; border-bottom:1px solid var(--b1); font-size:11px; }
 .stats-table tr:last-child td { border-bottom:none; }
-.bar-wrap { display:flex; align-items:center; gap:8px; }
-.bar-bg { flex:1; height:3px; background:var(--b2); border-radius:2px; overflow:hidden; }
+.stats-table tr:hover td { background:rgba(255,255,255,0.02); cursor:pointer; }
+.bar-wrap { display:flex; align-items:center; gap:6px; }
+.bar-bg { flex:1; height:3px; background:var(--b1); border-radius:2px; overflow:hidden; }
 .bar-fill { height:100%; border-radius:2px; }
+.bt-summary { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--b1); border:1px solid var(--b1); margin-bottom:22px; }
+.bt-card { background:var(--s2); padding:14px 16px; }
+.bt-val { font-family:var(--fh); font-size:20px; font-weight:800; margin-top:4px; letter-spacing:-0.5px; }
+.sig-acc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:22px; }
+.sig-acc-card { background:var(--s2); border:1px solid var(--b1); padding:12px; }
+.scan-group { margin-bottom:28px; }
+.scan-group-hdr { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--b1); margin-bottom:10px; }
+.scan-group-date { font-family:var(--fh); font-size:12px; font-weight:700; }
+.bt-table { width:100%; border-collapse:collapse; }
+.bt-table th { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#aaa; text-align:left; padding:6px 10px; border-bottom:1px solid var(--b1); font-weight:400; }
+.bt-table td { padding:7px 10px; border-bottom:1px solid var(--b1); font-size:11px; }
+.bt-table tr:last-child td { border-bottom:none; }
+.op { font-size:9px; padding:2px 6px; border:1px solid; letter-spacing:0.05em; text-transform:uppercase; font-weight:600; }
+.op-up   { color:var(--green);  border-color:rgba(78,245,160,0.4); }
+.op-down { color:var(--red);    border-color:rgba(245,80,78,0.4); }
+.op-pend { color:var(--yellow); border-color:rgba(245,212,78,0.4); }
+.op-flat { color:var(--muted);  border-color:var(--b2); }
+.dp { color:var(--green); }
+.dn { color:var(--red); }
+.dm { color:var(--muted); }
+.refresh-btn { font-size:9px; padding:3px 8px; background:none; border:1px solid var(--b2); color:var(--muted); cursor:pointer; font-family:var(--fm); letter-spacing:0.04em; transition:all 0.15s; }
+.refresh-btn:hover { color:var(--text); border-color:var(--muted); }
 
 /* ── Empty ── */
-.empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center; gap:10px; color:var(--muted); }
-.empty-glyph { font-family:var(--fh); font-size:42px; font-weight:800; color:var(--b2); letter-spacing:-2px; }
+.empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:50px 20px; text-align:center; gap:8px; color:var(--muted); }
+.empty-glyph { font-family:var(--fh); font-size:40px; font-weight:800; color:var(--b2); letter-spacing:-2px; margin-bottom:8px; }
+.error-bar { background:rgba(245,80,78,0.08); border:1px solid rgba(245,80,78,0.3); padding:10px 14px; color:var(--red); font-size:11px; margin-bottom:14px; }
 
 /* ── Animations ── */
 .fade-in { animation:fi 0.18s ease; }
-@keyframes fi { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
-
-/* new-entry highlight */
-.new-flash { animation:flash 0.5s ease; }
-@keyframes flash { 0%,100%{ background:var(--s2); } 50%{ background:rgba(212,245,78,0.12); } }
+@keyframes fi { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+a { color:var(--accent); }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="app">
 
   <!-- Rail -->
   <div class="rail">
-    <div class="rail-logo">T</div>
-    <button class="rail-btn active" id="rb-journal" onclick="switchView('journal')" title="Journal">⊞</button>
-    <button class="rail-btn" id="rb-stats" onclick="switchView('stats')" title="Stats">◈</button>
-    <div class="rail-sep"></div>
-    <button class="rail-btn" id="rb-new" onclick="startNewEntry()" title="New Entry" style="color:var(--accent)">＋</button>
+    <div class="rail-logo">OS</div>
+    <button class="rail-btn active" id="rb-scanner" onclick="goTo('scanner')" title="Scanner">
+      <span>◎</span><span class="rail-lbl">Scan</span>
+    </button>
+    <button class="rail-btn" id="rb-tracker" onclick="goTo('tracker')" title="Tracker">
+      <span>⊞</span><span class="rail-lbl">Track</span>
+    </button>
+    <button class="rail-btn" id="rb-backtest" onclick="goTo('backtest')" title="Backtest">
+      <span>◈</span><span class="rail-lbl">Back</span>
+    </button>
+    <button class="rail-btn" id="rb-stats" onclick="goTo('stats')" title="Stats">
+      <span>▦</span><span class="rail-lbl">Stats</span>
+    </button>
+    <button class="rail-new" onclick="newTrackerEntry()" title="New Entry">+</button>
   </div>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
+  <!-- Tracker sidebar -->
+  <div class="sidebar" id="tracker-sidebar">
     <div class="sb-top">
-      <input class="sb-search" placeholder="search ticker, narrative…" oninput="filterSearch(this.value)" id="sb-search">
+      <input class="sb-search" placeholder="search…" oninput="filterSb(this.value)" id="sb-search">
     </div>
     <div class="sb-list" id="sb-list"></div>
   </div>
 
   <!-- Main -->
   <div class="main">
+    <!-- Topbar -->
     <div class="topbar">
-      <div class="topbar-title" id="topbar-title">Thesis Tracker</div>
-      <div class="topbar-right" id="topbar-right"></div>
-    </div>
-    <div class="content" id="content">
-      <div class="empty fade-in">
-        <div class="empty-glyph">∅</div>
-        <div style="font-family:var(--fh);font-weight:700;color:var(--text)">No entries yet.</div>
-        <div style="font-size:11px;max-width:260px">Every trade starts with a narrative. Start capturing yours.</div>
-        <button class="btn btn-primary" onclick="startNewEntry()" style="margin-top:8px">New Entry</button>
+      <div class="topbar-title" id="topbar-title">Thesis OS</div>
+      <div class="topbar-right" id="topbar-right">
+        <div id="scan-time" style="font-size:10px;color:var(--dim)"></div>
+        <button class="btn-ghost btn-sm" id="keys-btn" onclick="toggleSettings()" style="display:none">⚙ Keys</button>
+        <button class="btn btn-primary btn-sm" id="scan-btn" onclick="runScan()" style="display:none">▶ Run Scan</button>
       </div>
+    </div>
+
+    <!-- Settings (scanner) -->
+    <div class="settings-panel" id="settings-panel">
+      <div class="settings-grid">
+        <div class="setting-group">
+          <div class="setting-label">Anthropic API Key</div>
+          <input type="password" id="key-anthropic" placeholder="sk-ant-…" oninput="saveKeys()">
+          <div style="font-size:9px;color:var(--dim);margin-top:3px">For AI thesis · <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+        </div>
+        <div class="setting-group">
+          <div class="setting-label">Helius API Key</div>
+          <input type="password" id="key-helius" placeholder="helius key" oninput="saveKeys()">
+          <div style="font-size:9px;color:var(--dim);margin-top:3px">Solana onchain · <a href="https://helius.dev" target="_blank">helius.dev</a></div>
+        </div>
+        <div class="setting-group">
+          <div class="setting-label">Reddit Credentials</div>
+          <input type="text" id="key-reddit-id" placeholder="Client ID" oninput="saveKeys()" style="margin-bottom:4px">
+          <input type="password" id="key-reddit-secret" placeholder="Client Secret" oninput="saveKeys()">
+          <div style="font-size:9px;color:var(--dim);margin-top:3px"><a href="https://www.reddit.com/prefs/apps" target="_blank">reddit.com/prefs/apps</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-wrap">
+      <div class="content" id="main-content"></div>
     </div>
   </div>
 </div>
 
-<!-- Pre-exit modal -->
+<!-- Exit modal -->
 <div class="modal-overlay" id="exit-modal" style="display:none">
   <div class="modal">
     <div class="modal-title">Close Position</div>
-    <div class="modal-sub">Before you close this trade, review your original thesis.<br>Was it right — even if price wasn't?</div>
+    <div class="modal-sub">Review your original thesis before closing.<br>Was it right — even if price wasn't?</div>
     <div class="thesis-preview" id="exit-thesis-preview"></div>
     <div class="field-label" style="margin-bottom:8px">Is your thesis still intact?</div>
     <div class="intact-opts">
-      <div class="intact-opt" onclick="setIntact('yes')">
-        <div class="intact-opt-icon">✓</div>
-        <div class="intact-opt-label">Yes</div>
-        <div class="intact-opt-sub">Narrative played out</div>
-      </div>
-      <div class="intact-opt" onclick="setIntact('partial')">
-        <div class="intact-opt-icon">~</div>
-        <div class="intact-opt-label">Partial</div>
-        <div class="intact-opt-sub">Mixed result</div>
-      </div>
-      <div class="intact-opt" onclick="setIntact('no')">
-        <div class="intact-opt-icon">✗</div>
-        <div class="intact-opt-label">No</div>
-        <div class="intact-opt-sub">Thesis was wrong</div>
+      <div class="intact-opt" onclick="setIntact('yes',this)"><div class="intact-opt-icon">✓</div><div class="intact-opt-label">Yes</div><div class="intact-opt-sub">Played out</div></div>
+      <div class="intact-opt" onclick="setIntact('partial',this)"><div class="intact-opt-icon">~</div><div class="intact-opt-label">Partial</div><div class="intact-opt-sub">Mixed</div></div>
+      <div class="intact-opt" onclick="setIntact('no',this)"><div class="intact-opt-icon">✗</div><div class="intact-opt-label">No</div><div class="intact-opt-sub">Was wrong</div></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <div class="field-label">What actually happened?</div>
+      <textarea id="exit-postmortem" rows="3" placeholder="Narrative played out but price didn't follow…"></textarea>
+    </div>
+    <div class="form-row c2">
+      <div class="form-group"><div class="field-label">Exit Price</div><input id="exit-price" type="text" placeholder="0.00"></div>
+      <div class="form-group"><div class="field-label">Outcome</div>
+        <select id="exit-outcome"><option value="win">Win</option><option value="loss">Loss</option><option value="miss">Missed</option></select>
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:14px">
-      <div class="field-label">What actually happened? (optional)</div>
-      <textarea id="exit-postmortem" placeholder="Narrative played out but price didn't follow. Exited on liquidity drain not thesis invalidation…" rows="3"></textarea>
-    </div>
-    <div class="form-row cols2">
-      <div class="form-group">
-        <div class="field-label">Exit Price</div>
-        <input id="exit-price" type="text" placeholder="0.00">
-      </div>
-      <div class="form-group">
-        <div class="field-label">Outcome</div>
-        <select id="exit-outcome">
-          <option value="win">Win</option>
-          <option value="loss">Loss</option>
-          <option value="miss">Missed / Passed</option>
-        </select>
-      </div>
-    </div>
-    <div class="btn-row" style="border:none;padding:0;margin-top:16px">
+    <div class="btn-row" style="border:none;padding:0;margin-top:14px">
       <button class="btn btn-primary" onclick="confirmExit()">Close Trade</button>
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
     </div>
@@ -286,674 +402,989 @@ input::placeholder, textarea::placeholder { color:#666; }
 </div>
 
 <script>
-// ───── State ─────
-const PHASES = ['Emerging','Building','Peak','Fading','Dead'];
-const PCOLORS = ['#4ef5a0','#d4f54e','#f5d44e','#f5954e','#525252'];
-const PSUBS = ['hours–days','narrative growing','full attention','losing steam','forgotten'];
-const CHAINS = ['SOL','BASE','ETH','ARB','OTHER'];
-const SOURCES = ['Own Scan','CT','TG Alpha','Insider','Copy'];
+// ══════════════════════════════════════
+// SHARED STATE & CONSTANTS
+// ══════════════════════════════════════
+const PHASES   = ['Emerging','Building','Peak','Fading','Dead'];
+const PCOLORS  = ['#4ef5a0','#c8f050','#f5d44e','#f5954e','#525252'];
+const PSUBS    = ['hours–days','growing','full attention','losing steam','forgotten'];
+const CHAINS   = ['SOL','BASE','ETH','ARB','OTHER'];
+const SOURCES  = ['Own Scan','CT','TG Alpha','Insider','Copy'];
 const TIMESCALES = ['Hours','Days','Weeks','Months'];
-const SIZES = ['0.5×','1×','2×','3×'];
-const DIRS = ['Long','Short','Watch','Pass'];
+const SIZES    = ['0.5×','1×','2×','3×'];
+const DIRS     = ['Long','Short','Watch','Pass'];
 const OUTCOMES = ['open','win','loss','miss'];
+const MC_RANGES = { micro:[100000,1000000], small:[1000000,10000000], mid:[10000000,Infinity] };
 
-let db = JSON.parse(localStorage.getItem('thesis-v2') || '[]');
-let currentId = null;
-let currentView = 'journal';
-let searchQ = '';
+let currentView = 'scanner';
+let keys = {};
+let scanResults = [];
+let scanFilters = { chains: new Set(['SOL','BASE']), mc: new Set(['micro','small']), minScore: 50 };
+
+// Tracker state
+let tdb = JSON.parse(localStorage.getItem('thesis-v2') || '[]');
+let currentEntryId = null;
+let _fs = {};
+let _conviction = null;
+let _phase = null;
 let _exitId = null;
 let _intactVal = null;
+let sbSearchQ = '';
 
-// form state
-let fs = {};
-
-function save() { localStorage.setItem('thesis-v2', JSON.stringify(db)); }
+function saveTracker() { localStorage.setItem('thesis-v2', JSON.stringify(tdb)); }
 function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
-function fmt(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+function fmtDate(iso) { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function fmtDateFull(iso) { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtMC(n) {
+  if (!n && n!==0) return '—';
+  if (n>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+  if (n>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
+  return '$'+n.toFixed(0);
 }
-function fmtFull(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+function fmtPct(n) { if(n===null||n===undefined) return '—'; return (n>=0?'+':'')+n.toFixed(1)+'%'; }
+function pctColor(n) { if(!n) return 'var(--muted)'; if(n>50) return 'var(--green)'; if(n>0) return 'var(--yellow)'; return 'var(--red)'; }
+function scoreColor(s) { if(s>=75) return 'var(--green)'; if(s>=55) return 'var(--yellow)'; return 'var(--red)'; }
+function gv(id) { const el=document.getElementById(id); return el?el.value.trim():''; }
+
+// ══════════════════════════════════════
+// NAV
+// ══════════════════════════════════════
+function goTo(view) {
+  currentView = view;
+  ['scanner','tracker','backtest','stats'].forEach(v => {
+    document.getElementById('rb-'+v).classList.toggle('active', v===view);
+  });
+  // sidebar only visible for tracker
+  document.getElementById('tracker-sidebar').classList.toggle('hidden', view !== 'tracker');
+  // scanner controls
+  document.getElementById('scan-btn').style.display = view==='scanner' ? '' : 'none';
+  document.getElementById('keys-btn').style.display = view==='scanner' ? '' : 'none';
+  document.getElementById('scan-time').style.display = view==='scanner' ? '' : 'none';
+  if (view !== 'scanner') document.getElementById('settings-panel').classList.remove('open');
+
+  document.getElementById('topbar-right').querySelector('#scan-time') &&
+    (document.getElementById('scan-time').style.display = view==='scanner'?'':'none');
+
+  if (view==='scanner')  renderScannerView();
+  if (view==='tracker')  { renderTrackerSidebar(); if(currentEntryId){ const e=tdb.find(x=>x.id===currentEntryId); if(e) renderDetail(e); } else showTrackerEmpty(); }
+  if (view==='backtest') renderBacktest();
+  if (view==='stats')    renderTrackerStats();
 }
 
-// ───── Sidebar ─────
-function renderSidebar() {
+// ══════════════════════════════════════
+// SCANNER VIEW
+// ══════════════════════════════════════
+function renderScannerView() {
+  document.getElementById('topbar-title').textContent = 'Morning Scanner';
+  const content = document.getElementById('main-content');
+
+  const filterGroup = (id, items, activeSet, onclick) =>
+    `<div class="tog-group" id="${id}">${items.map(v=>`<div class="filter-tog ${activeSet.has(v)?'on':''}" onclick="${onclick}('${v}',this)">${v}</div>`).join('')}</div>`;
+
+  content.innerHTML = `
+    <div class="scan-controls">
+      <div class="ctrl-label">Chain</div>
+      ${filterGroup('fg-chain',['SOL','BASE'],scanFilters.chains,"toggleScanFilter.bind(null,'chain')")}
+      <div class="dv"></div>
+      <div class="ctrl-label">MC</div>
+      ${filterGroup('fg-mc',['Micro','Small','Mid'],new Set([...scanFilters.mc].map(x=>x.charAt(0).toUpperCase()+x.slice(1))),"toggleScanFilter.bind(null,'mc')")}
+      <div class="dv"></div>
+      <div class="ctrl-label">Min Score</div>
+      <div class="tog-group" id="fg-score">
+        ${[['All',0],['50+',50],['70+',70]].map(([l,v])=>`<div class="filter-tog ${scanFilters.minScore===v?'on':''}" onclick="setMinScore(${v},this)">${l}</div>`).join('')}
+      </div>
+      <div style="margin-left:auto;font-size:10px;color:var(--dim)" id="result-count"></div>
+    </div>
+    <div class="scan-status" id="scan-status">
+      <div class="pulse"></div>
+      <div id="status-text">Initializing…</div>
+      <div class="prog-wrap"><div class="prog-fill" id="prog-fill"></div></div>
+      <div id="status-pct" style="font-size:10px;color:var(--muted);min-width:28px;text-align:right">0%</div>
+    </div>
+    <div class="error-bar" id="error-bar" style="display:none"></div>
+    <div id="scan-results">
+      <div class="empty">
+        <div class="empty-glyph">◎</div>
+        <div style="font-family:var(--fh);font-weight:700;color:var(--text)">Ready to scan.</div>
+        <div style="font-size:11px;max-width:280px;margin:4px auto 0">Add API keys (⚙ Keys above), then hit Run Scan to pull today's candidates.</div>
+      </div>
+    </div>`;
+}
+
+function toggleScanFilter(group, val, el) {
+  const key = val.toLowerCase();
+  if (group==='chain') {
+    if (scanFilters.chains.has(val)) { if(scanFilters.chains.size>1) scanFilters.chains.delete(val); }
+    else scanFilters.chains.add(val);
+    el.classList.toggle('on', scanFilters.chains.has(val));
+  } else {
+    if (scanFilters.mc.has(key)) { if(scanFilters.mc.size>1) scanFilters.mc.delete(key); }
+    else scanFilters.mc.add(key);
+    el.classList.toggle('on', scanFilters.mc.has(key));
+  }
+  renderTokenCards();
+}
+
+function setMinScore(n, el) {
+  scanFilters.minScore = n;
+  document.querySelectorAll('#fg-score .filter-tog').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  renderTokenCards();
+}
+
+function setProgress(pct, text) {
+  const pf = document.getElementById('prog-fill');
+  const pp = document.getElementById('status-pct');
+  const st = document.getElementById('status-text');
+  if(pf) pf.style.width=pct+'%';
+  if(pp) pp.textContent=pct+'%';
+  if(st&&text) st.textContent=text;
+}
+
+function showScanStatus(on) {
+  const el = document.getElementById('scan-status');
+  if(el) el.classList.toggle('on', on);
+}
+
+function showScanError(msg) {
+  const el = document.getElementById('error-bar');
+  if(!el) return;
+  if(msg) { el.textContent=msg; el.style.display='block'; }
+  else el.style.display='none';
+}
+
+// ── Run Scan ──
+async function runScan() {
+  if (currentView !== 'scanner') return;
+  showScanError('');
+  document.getElementById('scan-btn').disabled = true;
+  showScanStatus(true);
+  setProgress(0,'Fetching trending pairs from DexScreener…');
+
+  try {
+    setProgress(10,'DexScreener — fetching boosted tokens…');
+    const dexTokens = await fetchDexScreener();
+    setProgress(30,`Got ${dexTokens.length} candidates. Scoring…`);
+
+    let redditMap = {};
+    if (keys.redditId && keys.redditSecret) {
+      setProgress(35,'Reddit — checking mentions…');
+      redditMap = await fetchRedditSignals(dexTokens.map(t=>t.symbol));
+      setProgress(50,'Reddit signal loaded.');
+    }
+
+    let heliusMap = {};
+    if (keys.helius) {
+      setProgress(55,'Helius — onchain metrics…');
+      heliusMap = await fetchHeliusData(dexTokens.filter(t=>t.chain==='SOL').map(t=>t.address).filter(Boolean));
+      setProgress(70,'Onchain data loaded.');
+    }
+
+    setProgress(72,'Scoring and ranking…');
+    const scored = dexTokens.map(t=>scoreToken(t, redditMap[t.symbol]||{}, heliusMap[t.address]||{}));
+    scored.sort((a,b)=>b.score-a.score);
+    scanResults = scored.slice(0,20);
+    snapshotScan(scanResults);
+
+    setProgress(80,'Generating AI thesis…');
+    renderTokenCards();
+
+    if (keys.anthropic) {
+      const top = scanResults.slice(0,8);
+      for (let i=0; i<top.length; i++) {
+        setProgress(80+Math.round(i/top.length*18),`Thesis ${i+1}/${top.length}…`);
+        top[i].thesis = await generateThesis(top[i]);
+        updateCardThesis(top[i].id, top[i].thesis);
+      }
+    }
+
+    setProgress(100,`Done — ${scanResults.length} ranked.`);
+    document.getElementById('scan-time').textContent = 'Scanned '+new Date().toLocaleTimeString();
+    setTimeout(()=>showScanStatus(false), 2000);
+  } catch(err) {
+    showScanError('Scan error: '+err.message);
+    showScanStatus(false);
+    console.error(err);
+  }
+  document.getElementById('scan-btn').disabled = false;
+}
+
+// ── DexScreener ──
+async function fetchDexScreener() {
+  const tokens = [];
+  try {
+    const r = await fetch('https://api.dexscreener.com/token-boosts/top/v1');
+    const boosts = await r.json();
+    for (const boost of (Array.isArray(boosts)?boosts:[]).slice(0,40)) {
+      const chain = boost.chainId==='solana'?'SOL':boost.chainId==='base'?'BASE':null;
+      if (!chain||!scanFilters.chains.has(chain)) continue;
+      try {
+        const pr = await fetch(`https://api.dexscreener.com/tokens/v1/${boost.chainId}/${boost.tokenAddress}`);
+        const pd = await pr.json();
+        const pairs = pd?.pairs||[];
+        if (!pairs.length) continue;
+        const pair = pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+        const mc = pair.marketCap||pair.fdv||0;
+        const inRange = [...scanFilters.mc].some(r=>mc>=MC_RANGES[r][0]&&mc<MC_RANGES[r][1]);
+        if (!inRange) continue;
+        tokens.push(buildToken(boost.tokenAddress, chain, pair, boost.totalAmount||0));
+      } catch(e) {}
+    }
+  } catch(e) {}
+
+  if (tokens.length < 5) {
+    for (const ch of ['solana','base']) {
+      if (!scanFilters.chains.has(ch==='solana'?'SOL':'BASE')) continue;
+      try {
+        const r = await fetch(`https://api.dexscreener.com/latest/dex/search?q=trending&chainId=${ch}`);
+        const d = await r.json();
+        for (const pair of (d.pairs||[]).slice(0,20)) {
+          const mc = pair.marketCap||pair.fdv||0;
+          const inRange = [...scanFilters.mc].some(r=>mc>=MC_RANGES[r][0]&&mc<MC_RANGES[r][1]);
+          if (!inRange) continue;
+          tokens.push(buildToken(pair.baseToken?.address||uid(), ch==='solana'?'SOL':'BASE', pair, 0));
+        }
+      } catch(e) {}
+    }
+  }
+  const seen = new Set();
+  return tokens.filter(t=>{ if(seen.has(t.id)) return false; seen.add(t.id); return true; });
+}
+
+function buildToken(address, chain, pair, boostAmount) {
+  return {
+    id: address, address, chain,
+    symbol: (pair.baseToken?.symbol||'???').toUpperCase(),
+    name: pair.baseToken?.name||'',
+    mc: pair.marketCap||pair.fdv||0,
+    price: parseFloat(pair.priceUsd)||0,
+    priceChange1h: pair.priceChange?.h1||0,
+    priceChange6h: pair.priceChange?.h6||0,
+    priceChange24h: pair.priceChange?.h24||0,
+    volume24h: pair.volume?.h24||0,
+    liquidity: pair.liquidity?.usd||0,
+    buys1h: pair.txns?.h1?.buys||0,
+    sells1h: pair.txns?.h1?.sells||0,
+    pairUrl: pair.url||'',
+    boostAmount,
+  };
+}
+
+// ── Reddit ──
+async function fetchRedditSignals(symbols) {
+  const map = {};
+  try {
+    const creds = btoa(`${keys.redditId}:${keys.redditSecret}`);
+    const tr = await fetch('https://www.reddit.com/api/v1/access_token', {
+      method:'POST', headers:{'Authorization':`Basic ${creds}`,'Content-Type':'application/x-www-form-urlencoded'},
+      body:'grant_type=client_credentials'
+    });
+    const td = await tr.json();
+    if (!td.access_token) return map;
+    const sr = await fetch(`https://oauth.reddit.com/search.json?q=${encodeURIComponent(symbols.slice(0,10).join(' OR '))}&sort=new&limit=100`,
+      { headers:{'Authorization':`Bearer ${td.access_token}`,'User-Agent':'ThesisOS/1.0'} });
+    const sd = await sr.json();
+    for (const post of sd?.data?.children||[]) {
+      const txt = (post.data.title+' '+(post.data.selftext||'')).toUpperCase();
+      for (const sym of symbols) {
+        if (txt.includes(sym)) {
+          if (!map[sym]) map[sym] = { mentions:0, score:0 };
+          map[sym].mentions++;
+          map[sym].score += post.data.score||0;
+        }
+      }
+    }
+  } catch(e) {}
+  return map;
+}
+
+// ── Helius ──
+async function fetchHeliusData(addresses) {
+  const map = {};
+  if (!addresses.length||!keys.helius) return map;
+  try {
+    const r = await fetch(`https://mainnet.helius-rpc.com/?api-key=${keys.helius}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jsonrpc:'2.0',id:1,method:'getMultipleAccounts',params:[addresses.slice(0,10),{encoding:'jsonParsed'}]})
+    });
+    const d = await r.json();
+    (d?.result?.value||[]).forEach((acc,i)=>{ if(acc&&addresses[i]) map[addresses[i]]={onchainVerified:true}; });
+  } catch(e) {}
+  return map;
+}
+
+// ── Score ──
+function scoreToken(token, reddit, helius) {
+  let score = 0;
+  const signals = [];
+  const p1h = token.priceChange1h||0;
+  const p24h = token.priceChange24h||0;
+  if (p1h>20) { score+=15; signals.push({t:'🔥 +'+p1h.toFixed(0)+'% 1h',c:'sg'}); }
+  else if (p1h>5) { score+=8; signals.push({t:'↑ +'+p1h.toFixed(0)+'% 1h',c:'sg'}); }
+  else if (p1h<-15) { score-=5; signals.push({t:'↓ '+p1h.toFixed(0)+'% 1h',c:'sr'}); }
+  if (p24h>100) { score+=10; signals.push({t:'+'+p24h.toFixed(0)+'% 24h',c:'sg'}); }
+  else if (p24h>30) score+=5;
+  const vmr = token.mc>0?token.volume24h/token.mc:0;
+  if (vmr>3) { score+=20; signals.push({t:'Vol/MC '+vmr.toFixed(1)+'×',c:'sg'}); }
+  else if (vmr>1) { score+=12; signals.push({t:'Vol/MC '+vmr.toFixed(1)+'×',c:'sy'}); }
+  else if (vmr>0.3) score+=5;
+  const total = token.buys1h+token.sells1h;
+  const br = total>0?token.buys1h/total:0.5;
+  if (br>0.7) { score+=15; signals.push({t:'Buys '+Math.round(br*100)+'%',c:'sg'}); }
+  else if (br>0.55) { score+=8; signals.push({t:'Buys '+Math.round(br*100)+'%',c:'sy'}); }
+  else if (br<0.4) { score-=5; signals.push({t:'Sell pressure',c:'sr'}); }
+  if (token.liquidity>100000) { score+=10; signals.push({t:'Liq '+fmtMC(token.liquidity),c:'sb'}); }
+  else if (token.liquidity>20000) { score+=5; signals.push({t:'Liq '+fmtMC(token.liquidity),c:'sy'}); }
+  else if (token.liquidity<5000) { score-=10; signals.push({t:'Thin liq',c:'sr'}); }
+  if (token.mc<500000) { score+=10; signals.push({t:'MC '+fmtMC(token.mc),c:'sg'}); }
+  else if (token.mc<2000000) { score+=7; signals.push({t:'MC '+fmtMC(token.mc),c:'sy'}); }
+  else score+=3;
+  if (token.boostAmount>500) { score+=10; signals.push({t:'Boosted ×'+token.boostAmount,c:'sp'}); }
+  else if (token.boostAmount>100) { score+=5; signals.push({t:'Boosted',c:'sp'}); }
+  if (reddit.mentions>5) { score+=10; signals.push({t:'Reddit ×'+reddit.mentions,c:'sb'}); }
+  else if (reddit.mentions>1) { score+=5; signals.push({t:'Reddit',c:'sb'}); }
+  if (helius.onchainVerified) { score+=5; signals.push({t:'Onchain ✓',c:'sg'}); }
+  return { ...token, score:Math.max(0,Math.min(100,Math.round(score))), signals, thesis:null, reddit, helius };
+}
+
+// ── AI Thesis ──
+async function generateThesis(token) {
+  if (!keys.anthropic) return null;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':keys.anthropic,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-calls':'true'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:180, messages:[{role:'user',content:
+        `Onchain trader thesis. Be brutal, concise, no fluff.\nToken: ${token.symbol} on ${token.chain}\nMC: ${fmtMC(token.mc)} | 1h: ${fmtPct(token.priceChange1h)} | 24h: ${fmtPct(token.priceChange24h)}\nVol/MC: ${token.mc>0?(token.volume24h/token.mc).toFixed(2):'—'}× | Liq: ${fmtMC(token.liquidity)}\nBuys/Sells 1h: ${token.buys1h}/${token.sells1h} | Boost: ${token.boostAmount||'none'} | Reddit: ${token.reddit?.mentions||0}\nScore: ${token.score}/100\n2-3 sentences: signal, narrative, biggest risk. Flag rugs.`
+      }]})
+    });
+    const d = await res.json();
+    return d.content?.[0]?.text||null;
+  } catch(e) { return null; }
+}
+
+function updateCardThesis(id, thesis) {
+  const el = document.getElementById('thesis-'+CSS.escape(id));
+  if (el) el.innerHTML = thesis || '<span style="color:var(--dim)">No Anthropic key</span>';
+}
+
+// ── Render cards ──
+function renderTokenCards() {
+  const area = document.getElementById('scan-results');
+  if (!area) return;
+  let filtered = scanResults.filter(t => {
+    if (t.score < scanFilters.minScore) return false;
+    if (!scanFilters.chains.has(t.chain)) return false;
+    return [...scanFilters.mc].some(r=>t.mc>=MC_RANGES[r][0]&&t.mc<MC_RANGES[r][1]);
+  });
+  const rc = document.getElementById('result-count');
+  if (rc) rc.textContent = filtered.length ? filtered.length+' results' : '';
+  if (!filtered.length) { area.innerHTML='<div class="empty"><div class="empty-glyph">◌</div><div>No results match filters.</div></div>'; return; }
+  const acc = ['var(--green)','var(--yellow)','var(--blue)','var(--purple)'];
+  area.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:var(--fh);font-size:13px;font-weight:700">Today's Candidates <span style="color:var(--dim);font-weight:400;font-size:11px">— by signal score</span></div>
+      <div style="font-size:10px;color:var(--muted)">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}</div>
+    </div>
+    <div class="tokens-grid">${filtered.map((t,i)=>renderCard(t,i,acc[i%acc.length])).join('')}</div>`;
+}
+
+function renderCard(t, rank, accent) {
+  const sc = scoreColor(t.score);
+  return `
+  <div class="token-card" style="--card-c:${accent};animation-delay:${rank*0.04}s">
+    <div class="card-header">
+      <div class="card-rank">#${rank+1}</div>
+      <div class="card-ticker-wrap">
+        <div class="card-ticker">${t.symbol}</div>
+        <div class="card-name">${t.name}</div>
+      </div>
+      <div class="card-chain">${t.chain}</div>
+      <div class="score-ring" style="border-color:${sc}">
+        <div class="score-val" style="color:${sc}">${t.score}</div>
+        <div class="score-lbl" style="color:${sc}">score</div>
+      </div>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><div class="metric-lbl">Mkt Cap</div><div class="metric-val">${fmtMC(t.mc)}</div></div>
+      <div class="metric"><div class="metric-lbl">1h</div><div class="metric-val" style="color:${pctColor(t.priceChange1h)}">${fmtPct(t.priceChange1h)}</div></div>
+      <div class="metric"><div class="metric-lbl">Vol/MC</div><div class="metric-val" style="color:${t.mc>0&&t.volume24h/t.mc>1?'var(--green)':'var(--muted)'}">${t.mc>0?(t.volume24h/t.mc).toFixed(1)+'×':'—'}</div></div>
+      <div class="metric"><div class="metric-lbl">Liquidity</div><div class="metric-val">${fmtMC(t.liquidity)}</div></div>
+    </div>
+    <div class="card-signals">${t.signals.map(s=>`<span class="signal ${s.c}">${s.t}</span>`).join('')}</div>
+    <div class="card-thesis">
+      <div class="thesis-lbl">AI Thesis</div>
+      <div class="thesis-text" id="thesis-${t.id}">${t.thesis ? t.thesis : keys.anthropic ? '<span style="color:var(--dim);font-style:italic">Generating…</span>' : '<span style="color:var(--dim)">Add Anthropic key</span>'}</div>
+    </div>
+    <div class="card-actions">
+      ${t.pairUrl?`<a class="card-link" href="${t.pairUrl}" target="_blank">DEX ↗</a>`:''}
+      ${t.address?`<a class="card-link" href="https://solscan.io/token/${t.address}" target="_blank">Chain ↗</a>`:''}
+      <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="importToTracker('${t.id}')">+ Track</button>
+    </div>
+  </div>`;
+}
+
+function importToTracker(id) {
+  const t = scanResults.find(x=>x.id===id);
+  if (!t) return;
+  const entry = {
+    id: uid(), createdAt: new Date().toISOString(),
+    ticker: t.symbol, phase:'Emerging', chain:t.chain,
+    direction:'Long', source:'Own Scan', size:'1×', timescale:'Days', outcome:'open',
+    mc: fmtMC(t.mc).replace('$',''), entry: t.price?t.price.toFixed(6):'',
+    thesis1: t.thesis||`Score ${t.score}/100 — Vol/MC ${t.mc>0?(t.volume24h/t.mc).toFixed(1)+'×':''}, 1h: ${fmtPct(t.priceChange1h)}`,
+    exitTrigger:'', narrativeCore:t.thesis||'', devRisk:'', whyNow:'', mustBeTrue:'',
+    kol:'', catalysts:'', edge:'', pmNarrative:'', pmPrice:'', pmMiss:'',
+  };
+  tdb.push(entry);
+  saveTracker();
+  event.target.textContent = '✓ Tracked';
+  event.target.style.background = 'var(--yellow)';
+  setTimeout(()=>{ event.target.textContent='+ Track'; event.target.style.background=''; }, 2000);
+}
+
+// ══════════════════════════════════════
+// TRACKER
+// ══════════════════════════════════════
+function renderTrackerSidebar() {
+  document.getElementById('topbar-title').textContent = currentEntryId ? (tdb.find(x=>x.id===currentEntryId)?.ticker||'Tracker') : 'Thesis Tracker';
+  renderTrackerTopbarStats();
   const list = document.getElementById('sb-list');
-  let items = db.slice().reverse();
-  if (searchQ) {
-    const q = searchQ.toLowerCase();
-    items = items.filter(e =>
-      (e.ticker||'').toLowerCase().includes(q) ||
-      (e.narrativeCore||'').toLowerCase().includes(q) ||
-      (e.chain||'').toLowerCase().includes(q)
-    );
+  let items = tdb.slice().reverse();
+  if (sbSearchQ) {
+    const q = sbSearchQ.toLowerCase();
+    items = items.filter(e=>(e.ticker||'').toLowerCase().includes(q)||(e.narrativeCore||'').toLowerCase().includes(q));
   }
-  if (!items.length) {
-    list.innerHTML = `<div style="padding:16px;color:var(--muted);font-size:11px;text-align:center">No entries</div>`;
-    return;
-  }
+  if (!items.length) { list.innerHTML='<div style="padding:14px;color:var(--muted);font-size:11px;text-align:center">No entries</div>'; return; }
   list.innerHTML = items.map(e => {
     const pi = PHASES.indexOf(e.phase);
-    const pc = PCOLORS[pi] || 'var(--muted)';
-    return `
-      <div class="sb-item ${e.id===currentId?'active':''}" onclick="selectEntry('${e.id}')">
-        <div class="sb-item-top">
-          <div class="pdot" style="background:${pc}"></div>
-          <div class="sb-ticker">${e.ticker||'—'}</div>
-          <div class="sb-badges">
-            <span class="badge b-${e.outcome}">${e.outcome}</span>
-          </div>
-        </div>
-        <div class="sb-meta">
-          <span>${e.chain||''}</span>
-          <span>${fmt(e.createdAt)}</span>
-          <span style="color:${pc}">${e.phase||''}</span>
-        </div>
-      </div>`;
+    const pc = PCOLORS[pi]||'var(--muted)';
+    return `<div class="sb-item ${e.id===currentEntryId?'active':''}" onclick="selectEntry('${e.id}')">
+      <div class="sb-item-top">
+        <span class="pdot" style="background:${pc}"></span>
+        <span class="sb-ticker">${e.ticker||'—'}</span>
+        <span class="sb-badges"><span class="badge b-${e.outcome}">${e.outcome}</span></span>
+      </div>
+      <div class="sb-meta"><span>${e.chain||''}</span><span>${fmtDate(e.createdAt)}</span><span style="color:${pc}">${e.phase||''}</span></div>
+    </div>`;
   }).join('');
-  renderTopbarStats();
 }
 
-function filterSearch(q) {
-  searchQ = q;
-  renderSidebar();
-}
-
-function renderTopbarStats() {
-  const total = db.length;
-  const open = db.filter(e=>e.outcome==='open').length;
-  const wins = db.filter(e=>e.outcome==='win').length;
-  const closed = db.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
-  const wr = closed > 0 ? Math.round(wins/closed*100) : 0;
-  document.getElementById('topbar-right').innerHTML = `
+function renderTrackerTopbarStats() {
+  const total=tdb.length, open=tdb.filter(e=>e.outcome==='open').length;
+  const wins=tdb.filter(e=>e.outcome==='win').length, closed=tdb.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
+  const wr=closed>0?Math.round(wins/closed*100):0;
+  document.getElementById('topbar-right').innerHTML=`
     <div class="topbar-stat"><div class="topbar-stat-val" style="color:var(--accent)">${total}</div><div class="topbar-stat-label">Total</div></div>
     <div class="topbar-divider"></div>
     <div class="topbar-stat"><div class="topbar-stat-val" style="color:var(--yellow)">${open}</div><div class="topbar-stat-label">Open</div></div>
     <div class="topbar-divider"></div>
-    <div class="topbar-stat"><div class="topbar-stat-val" style="color:var(--green)">${wr}%</div><div class="topbar-stat-label">Win Rate</div></div>
-  `;
+    <div class="topbar-stat"><div class="topbar-stat-val" style="color:var(--green)">${wr}%</div><div class="topbar-stat-label">Win Rate</div></div>`;
 }
 
-// ───── View switching ─────
-function switchView(v) {
-  currentView = v;
-  ['journal','stats'].forEach(k => {
-    document.getElementById('rb-'+k)?.classList.toggle('active', k===v);
-  });
-  if (v==='stats') { currentId=null; renderStats(); }
-  else { renderSidebar(); if (currentId) { const e=db.find(x=>x.id===currentId); if(e) renderDetail(e); } else showEmpty(); }
-}
-
-// ───── New entry ─────
-function startNewEntry() {
-  currentId = null;
-  currentView = 'journal';
-  document.getElementById('rb-journal').classList.add('active');
-  document.getElementById('rb-stats').classList.remove('active');
-  fs = { phase:'Emerging', chain:'SOL', source:'Own Scan', size:'1×', direction:'Long', timescale:'Days', outcome:'open' };
-  document.getElementById('topbar-title').textContent = 'New Entry';
-  renderForm(null);
-  renderSidebar();
-}
+function filterSb(q) { sbSearchQ=q; renderTrackerSidebar(); }
 
 function selectEntry(id) {
-  currentId = id;
-  currentView = 'journal';
-  renderSidebar();
-  const e = db.find(x=>x.id===id);
-  if (e) renderDetail(e);
+  currentEntryId=id;
+  renderTrackerSidebar();
+  const e=tdb.find(x=>x.id===id);
+  if(e) renderDetail(e);
 }
 
-function showEmpty() {
-  document.getElementById('topbar-title').textContent = 'Thesis Tracker';
-  document.getElementById('content').innerHTML = `
+function showTrackerEmpty() {
+  document.getElementById('topbar-title').textContent='Thesis Tracker';
+  document.getElementById('main-content').innerHTML=`
     <div class="empty fade-in">
       <div class="empty-glyph">∅</div>
-      <div style="font-family:var(--fh);font-weight:700;color:var(--text)">Select or create an entry.</div>
+      <div style="font-family:var(--fh);font-weight:700;color:var(--text)">No entries yet.</div>
+      <div style="font-size:11px;max-width:260px;margin:4px auto">Every trade starts with a narrative. Hit + to start.</div>
     </div>`;
 }
 
-// ───── Form ─────
-function renderForm(e) {
-  const isNew = !e;
-  if (e) {
-    fs = {
-      phase: e.phase||'Emerging', chain: e.chain||'SOL', source: e.source||'Own Scan',
-      size: e.size||'1×', direction: e.direction||'Long', timescale: e.timescale||'Days',
-      outcome: e.outcome||'open'
-    };
-  }
+function newTrackerEntry() {
+  goTo('tracker');
+  currentEntryId=null;
+  _fs={phase:'Emerging',chain:'SOL',source:'Own Scan',size:'1×',direction:'Long',timescale:'Days',outcome:'open'};
+  _conviction=null; _phase=null;
+  document.getElementById('topbar-title').textContent='New Entry';
+  renderTrackerSidebar();
+  renderForm(null);
+}
 
-  document.getElementById('content').innerHTML = `
+function renderForm(e) {
+  const isNew=!e;
+  if (e) _fs={phase:e.phase||'Emerging',chain:e.chain||'SOL',source:e.source||'Own Scan',size:e.size||'1×',direction:e.direction||'Long',timescale:e.timescale||'Days',outcome:e.outcome||'open'};
+
+  const togRow = (key, items, colorVar) => `
+    <div class="tog-group">${items.map(v=>`<div class="tog ${_fs[key]===v?'on':''}" style="${_fs[key]===v?`background:${colorVar};border-color:${colorVar};`:''}" onclick="setFs('${key}','${v}',this,'${colorVar}')">${v}</div>`).join('')}</div>`;
+
+  document.getElementById('main-content').innerHTML=`
   <div class="fade-in">
     <div class="mode-tabs">
-      <button class="mode-tab active" id="mt-quick" onclick="setFormMode('quick')">Quick Capture</button>
+      <button class="mode-tab active" id="mt-quick" onclick="setFormMode('quick')">Quick</button>
       <button class="mode-tab" id="mt-full" onclick="setFormMode('full')">Full Thesis</button>
     </div>
-
-    <!-- QUICK CAPTURE -->
     <div id="form-quick">
-      <div class="qc-grid">
-        <div class="qc-group">
-          <div class="qc-label">Ticker</div>
-          <input id="f-ticker" type="text" placeholder="e.g. BONK" value="${e?.ticker||''}" style="font-family:var(--fh);font-weight:700;font-size:16px;">
-        </div>
-        <div class="qc-group">
-          <div class="qc-label">Chain</div>
-          <div class="tog-group" id="tg-chain">
-            ${CHAINS.map(c=>`<div class="tog ${fs.chain===c?'on':''}" style="${fs.chain===c?'background:var(--blue);border-color:var(--blue);':''}" onclick="tog('chain','${c}',this,'var(--blue)')">${c}</div>`).join('')}
-          </div>
-        </div>
-        <div class="qc-group">
-          <div class="qc-label">Direction</div>
-          <div class="tog-group" id="tg-dir">
-            ${DIRS.map(d=>`<div class="tog ${fs.direction===d?'on':''}" style="${fs.direction===d?'background:var(--accent);border-color:var(--accent);':''}" onclick="tog('direction','${d}',this,'var(--accent)')">${d}</div>`).join('')}
-          </div>
-        </div>
-        <div class="qc-group">
-          <div class="qc-label">Source</div>
-          <div class="tog-group" id="tg-source">
-            ${SOURCES.map(s=>`<div class="tog ${fs.source===s?'on':''}" style="${fs.source===s?'background:var(--purple);border-color:var(--purple);':''}" onclick="tog('source','${s}',this,'var(--purple)')">${s}</div>`).join('')}
-          </div>
-        </div>
-        <div class="qc-group">
-          <div class="qc-label">Size (vs normal)</div>
-          <div class="tog-group" id="tg-size">
-            ${SIZES.map(s=>`<div class="tog ${fs.size===s?'on':''}" style="${fs.size===s?'background:var(--orange);border-color:var(--orange);':''}" onclick="tog('size','${s}',this,'var(--orange)')">${s}</div>`).join('')}
-          </div>
-        </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px">
+        <div class="form-group"><div class="field-label">Ticker</div><input id="f-ticker" type="text" placeholder="BONK" value="${e?.ticker||''}" style="font-family:var(--fh);font-weight:700;font-size:16px"></div>
+        <div class="form-group"><div class="field-label">Chain</div>${togRow('chain',CHAINS,'var(--blue)')}</div>
+        <div class="form-group"><div class="field-label">Direction</div>${togRow('direction',DIRS,'var(--accent)')}</div>
+        <div class="form-group"><div class="field-label">Source</div>${togRow('source',SOURCES,'var(--purple)')}</div>
+        <div class="form-group"><div class="field-label">Size</div>${togRow('size',SIZES,'var(--orange)')}</div>
       </div>
-
-      <div class="form-row cols3" style="margin-top:10px">
-        <div class="form-group">
-          <div class="field-label">MC at Entry</div>
-          <input id="f-mc" type="text" placeholder="e.g. $2M, $800k" value="${e?.mc||''}">
-        </div>
-        <div class="form-group">
-          <div class="field-label">Entry Price</div>
-          <input id="f-entry" type="text" placeholder="0.00" value="${e?.entry||''}">
-        </div>
-        <div class="form-group">
-          <div class="field-label">Outcome</div>
-          <select id="f-outcome" onchange="fs.outcome=this.value">
-            ${OUTCOMES.map(o=>`<option value="${o}" ${fs.outcome===o?'selected':''}>${o.charAt(0).toUpperCase()+o.slice(1)}</option>`).join('')}
-          </select>
-        </div>
+      <div class="form-row c3" style="margin-bottom:10px">
+        <div class="form-group"><div class="field-label">MC at Entry</div><input id="f-mc" type="text" placeholder="$2M" value="${e?.mc||''}"></div>
+        <div class="form-group"><div class="field-label">Entry Price</div><input id="f-entry" type="text" placeholder="0.000000" value="${e?.entry||''}"></div>
+        <div class="form-group"><div class="field-label">Outcome</div><select id="f-outcome" onchange="_fs.outcome=this.value">${OUTCOMES.map(o=>`<option value="${o}" ${_fs.outcome===o?'selected':''}>${o.charAt(0).toUpperCase()+o.slice(1)}</option>`).join('')}</select></div>
       </div>
-
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">One-line thesis — what are you betting on?</div>
-        <input id="f-thesis1" type="text" placeholder="e.g. First memecoin on new Base deployment, KOL already posting, MC still sub $1M" value="${e?.thesis1||''}">
-      </div>
-
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">Exit Trigger — what will make you sell?</div>
-        <input id="f-exitTrigger" type="text" placeholder="e.g. KOL stops posting, MC hits $10M, or liquidity starts pulling" value="${e?.exitTrigger||''}">
-      </div>
+      <div class="form-group" style="margin-bottom:10px"><div class="field-label">One-line thesis</div><input id="f-thesis1" type="text" placeholder="First memecoin on new deployment, KOL posting, MC sub $1M" value="${e?.thesis1||''}"></div>
+      <div class="form-group"><div class="field-label">Exit Trigger — what will make you sell?</div><input id="f-exitTrigger" type="text" placeholder="KOL stops posting, MC hits $10M, liquidity pulls" value="${e?.exitTrigger||''}"></div>
     </div>
-
-    <!-- FULL THESIS (hidden by default) -->
     <div id="form-full" style="display:none">
       <div class="sec-label">Narrative Phase</div>
-      <div class="phase-grid" style="margin-bottom:14px">
-        ${PHASES.map((p,i)=>`
-          <div class="phase-tile ${fs.phase===p?'on':''}" id="pt-${p}"
-            style="${fs.phase===p?`background:${PCOLORS[i]};border-color:${PCOLORS[i]};`:''}"
-            onclick="selectPhase('${p}',${i})">
-            <div class="phase-tile-name" style="color:${fs.phase===p?'#000':'var(--text)'}">${p}</div>
-            <div class="phase-tile-sub">${PSUBS[i]}</div>
-          </div>`).join('')}
+      <div class="phase-grid" style="margin-bottom:12px">${PHASES.map((p,i)=>`
+        <div class="phase-tile ${_fs.phase===p?'on':''}" id="pt-${p}" style="${_fs.phase===p?`background:${PCOLORS[i]};border-color:${PCOLORS[i]};`:''}" onclick="selectPhase('${p}',${i})">
+          <div class="phase-tile-name" style="color:${_fs.phase===p?'#000':'var(--text)'}">${p}</div>
+          <div class="phase-tile-sub">${PSUBS[i]}</div>
+        </div>`).join('')}</div>
+      <div class="form-row c2">
+        <div class="form-group"><div class="field-label">Timescale</div>${togRow('timescale',TIMESCALES,'var(--green)')}</div>
+        <div class="form-group"><div class="field-label">Dev / Supply Risk</div><input id="f-devRisk" type="text" placeholder="Dev 8%, top 10 hold 34%, bundled?" value="${e?.devRisk||''}"></div>
       </div>
-
-      <div class="form-row cols2">
-        <div class="form-group">
-          <div class="field-label">Narrative Timescale</div>
-          <div class="tog-group" id="tg-ts">
-            ${TIMESCALES.map(t=>`<div class="tog ${fs.timescale===t?'on':''}" style="${fs.timescale===t?'background:var(--green);border-color:var(--green);':''}" onclick="tog('timescale','${t}',this,'var(--green)')">${t}</div>`).join('')}
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="field-label">Dev / Supply Risk</div>
-          <input id="f-devRisk" type="text" placeholder="e.g. Dev 8%, top 10 hold 34%, bundled?" value="${e?.devRisk||''}">
-        </div>
+      <div class="form-group" style="margin-top:10px"><div class="field-label">Core Narrative</div><textarea id="f-narrativeCore" placeholder="What is the market believing right now?">${e?.narrativeCore||''}</textarea></div>
+      <div class="form-group" style="margin-top:10px"><div class="field-label">Why Now</div><textarea id="f-whyNow" placeholder="What changed to make this timely?" rows="3">${e?.whyNow||''}</textarea></div>
+      <div class="form-group" style="margin-top:10px"><div class="field-label">What Must Be True</div><textarea id="f-mustBeTrue" placeholder="List key assumptions. If X doesn't happen, this is wrong.">${e?.mustBeTrue||''}</textarea></div>
+      <div class="form-row c2" style="margin-top:10px">
+        <div class="form-group"><div class="field-label">KOL / Social Signal</div><textarea id="f-kol" rows="3" placeholder="Who is posting, reach, when they started…">${e?.kol||''}</textarea></div>
+        <div class="form-group"><div class="field-label">Upcoming Catalysts</div><textarea id="f-catalysts" rows="3" placeholder="Events, listings, unlocks, narrative beats…">${e?.catalysts||''}</textarea></div>
       </div>
-
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">Core Narrative — what is the market believing?</div>
-        <textarea id="f-narrativeCore" placeholder="The narrative driving attention and capital into this asset…">${e?.narrativeCore||''}</textarea>
-      </div>
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">Why Now — what changed?</div>
-        <textarea id="f-whyNow" placeholder="The trigger that makes this a NOW trade…" rows="3">${e?.whyNow||''}</textarea>
-      </div>
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">What Must Be True — for this thesis to play out</div>
-        <textarea id="f-mustBeTrue" placeholder="List the key assumptions. If X doesn't happen, this is wrong.">${e?.mustBeTrue||''}</textarea>
-      </div>
-      <div class="form-row cols2" style="margin-top:10px">
-        <div class="form-group">
-          <div class="field-label">KOL / Social Signal</div>
-          <textarea id="f-kol" placeholder="Who is posting, when did they start, follower reach…" rows="3">${e?.kol||''}</textarea>
-        </div>
-        <div class="form-group">
-          <div class="field-label">Upcoming Catalysts</div>
-          <textarea id="f-catalysts" placeholder="Events, unlocks, listings, narrative beats…" rows="3">${e?.catalysts||''}</textarea>
-        </div>
-      </div>
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">My Edge — why do I have an advantage here?</div>
-        <textarea id="f-edge" placeholder="What do I see that isn't fully priced yet?" rows="3">${e?.edge||''}</textarea>
-      </div>
-
-      ${!isNew && e?.outcome !== 'open' ? `
-      <div class="sec-label" style="margin-top:20px">Post-Mortem</div>
-      <div class="form-group">
-        <div class="field-label">Did the narrative actually play out?</div>
-        <textarea id="f-pmNarrative" placeholder="Was the thesis right even if price was wrong?">${e?.pmNarrative||''}</textarea>
-      </div>
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">Did price follow the narrative?</div>
-        <textarea id="f-pmPrice" placeholder="Analyze relationship between narrative and price action…">${e?.pmPrice||''}</textarea>
-      </div>
-      <div class="form-group" style="margin-top:10px">
-        <div class="field-label">What did I miss?</div>
-        <textarea id="f-pmMiss" placeholder="The honest reflection — blind spot, wrong assumption, timing error…">${e?.pmMiss||''}</textarea>
-      </div>
-      ` : ''}
+      <div class="form-group" style="margin-top:10px"><div class="field-label">My Edge</div><textarea id="f-edge" rows="3" placeholder="What do I see that isn't priced yet?">${e?.edge||''}</textarea></div>
+      ${!isNew&&e?.outcome!=='open'?`
+      <div class="sec-label" style="margin-top:18px">Post-Mortem</div>
+      <div class="form-group"><div class="field-label">Did the narrative play out?</div><textarea id="f-pmNarrative">${e?.pmNarrative||''}</textarea></div>
+      <div class="form-group" style="margin-top:10px"><div class="field-label">Did price follow narrative?</div><textarea id="f-pmPrice">${e?.pmPrice||''}</textarea></div>
+      <div class="form-group" style="margin-top:10px"><div class="field-label">What did I miss?</div><textarea id="f-pmMiss">${e?.pmMiss||''}</textarea></div>`:''}
     </div>
-
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveEntry(${isNew?'null':`'${e?.id}'`})">${isNew?'Save Entry':'Update Entry'}</button>
-      ${!isNew ? `<button class="btn-ghost" onclick="selectEntry('${e.id}')">Cancel</button>` : ''}
-      ${!isNew && e.outcome==='open' ? `<button class="btn btn-primary" style="background:var(--red);margin-left:8px" onclick="openExitModal('${e.id}')">Close Trade</button>` : ''}
-      ${!isNew ? `<button class="btn-danger" onclick="deleteEntry('${e.id}')">Delete</button>` : ''}
+      <button class="btn btn-primary" onclick="saveEntry(${isNew?'null':`'${e?.id}'`})">${isNew?'Save Entry':'Update'}</button>
+      ${!isNew?`<button class="btn-ghost" onclick="selectEntry('${e.id}')">Cancel</button>`:''}
+      ${!isNew&&e.outcome==='open'?`<button class="btn btn-primary" style="background:var(--red)" onclick="openExitModal('${e.id}')">Close Trade</button>`:''}
+      ${!isNew?`<button class="btn-danger" onclick="deleteEntry('${e.id}')">Delete</button>`:''}
     </div>
   </div>`;
 }
 
 function setFormMode(m) {
-  document.getElementById('mt-quick').classList.toggle('active', m==='quick');
-  document.getElementById('mt-full').classList.toggle('active', m==='full');
-  document.getElementById('form-quick').style.display = m==='quick'?'':'none';
-  document.getElementById('form-full').style.display = m==='full'?'':'none';
+  document.getElementById('mt-quick').classList.toggle('active',m==='quick');
+  document.getElementById('mt-full').classList.toggle('active',m==='full');
+  document.getElementById('form-quick').style.display=m==='quick'?'':'none';
+  document.getElementById('form-full').style.display=m==='full'?'':'none';
 }
 
-function tog(key, val, el, color) {
-  fs[key] = val;
-  const parent = el.parentElement;
-  parent.querySelectorAll('.tog').forEach(t => {
-    t.classList.remove('on');
-    t.style.background = '';
-    t.style.borderColor = '';
-    t.style.color = '';
-  });
-  el.classList.add('on');
-  el.style.background = color;
-  el.style.borderColor = color;
-  el.style.color = '#000';
+function setFs(key,val,el,color) {
+  _fs[key]=val;
+  el.parentElement.querySelectorAll('.tog').forEach(t=>{ t.classList.remove('on'); t.style.background=''; t.style.borderColor=''; t.style.color=''; });
+  el.classList.add('on'); el.style.background=color; el.style.borderColor=color; el.style.color='#000';
 }
 
-function selectPhase(p, i) {
-  fs.phase = p;
-  PHASES.forEach((ph, idx) => {
-    const el = document.getElementById('pt-'+ph);
-    if (!el) return;
-    const on = ph===p;
-    el.classList.toggle('on', on);
-    el.style.background = on ? PCOLORS[idx] : '';
-    el.style.borderColor = on ? PCOLORS[idx] : '';
-    el.querySelector('.phase-tile-name').style.color = on ? '#000' : 'var(--text)';
-    el.querySelector('.phase-tile-sub').style.color = on ? 'rgba(0,0,0,0.6)' : '#888';
+function selectPhase(p,i) {
+  _fs.phase=p;
+  PHASES.forEach((ph,idx)=>{
+    const el=document.getElementById('pt-'+ph);
+    if(!el) return;
+    const on=ph===p;
+    el.classList.toggle('on',on);
+    el.style.background=on?PCOLORS[idx]:''; el.style.borderColor=on?PCOLORS[idx]:'';
+    el.querySelector('.phase-tile-name').style.color=on?'#000':'var(--text)';
+    el.querySelector('.phase-tile-sub').style.color=on?'rgba(0,0,0,0.6)':'#888';
   });
 }
-
-function gv(id) { const el=document.getElementById(id); return el?el.value.trim():''; }
 
 function saveEntry(id) {
-  const ticker = gv('f-ticker').toUpperCase();
+  const ticker=gv('f-ticker').toUpperCase();
   if (!ticker) { document.getElementById('f-ticker').style.borderColor='var(--red)'; return; }
-
-  const existing = id ? db.find(e=>e.id===id) : null;
-
-  const entry = {
-    id: id||uid(),
-    createdAt: existing?.createdAt||new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ticker,
-    phase: fs.phase||'Emerging',
-    chain: fs.chain||'SOL',
-    direction: fs.direction||'Long',
-    source: fs.source||'Own Scan',
-    size: fs.size||'1×',
-    timescale: fs.timescale||'Days',
-    outcome: gv('f-outcome')||fs.outcome||'open',
-    mc: gv('f-mc'),
-    entry: gv('f-entry'),
-    exitTrigger: gv('f-exitTrigger'),
-    thesis1: gv('f-thesis1'),
-    devRisk: gv('f-devRisk'),
-    narrativeCore: gv('f-narrativeCore'),
-    whyNow: gv('f-whyNow'),
-    mustBeTrue: gv('f-mustBeTrue'),
-    kol: gv('f-kol'),
-    catalysts: gv('f-catalysts'),
-    edge: gv('f-edge'),
-    pmNarrative: gv('f-pmNarrative'),
-    pmPrice: gv('f-pmPrice'),
-    pmMiss: gv('f-pmMiss'),
-    exitPrice: existing?.exitPrice||'',
-    intactVerdict: existing?.intactVerdict||'',
-    exitPostmortem: existing?.exitPostmortem||'',
+  const existing=id?tdb.find(e=>e.id===id):null;
+  const entry={
+    id:id||uid(), createdAt:existing?.createdAt||new Date().toISOString(), updatedAt:new Date().toISOString(),
+    ticker, phase:_fs.phase||'Emerging', chain:_fs.chain||'SOL', direction:_fs.direction||'Long',
+    source:_fs.source||'Own Scan', size:_fs.size||'1×', timescale:_fs.timescale||'Days',
+    outcome:gv('f-outcome')||_fs.outcome||'open', mc:gv('f-mc'), entry:gv('f-entry'),
+    exitTrigger:gv('f-exitTrigger'), thesis1:gv('f-thesis1'), devRisk:gv('f-devRisk'),
+    narrativeCore:gv('f-narrativeCore'), whyNow:gv('f-whyNow'), mustBeTrue:gv('f-mustBeTrue'),
+    kol:gv('f-kol'), catalysts:gv('f-catalysts'), edge:gv('f-edge'),
+    pmNarrative:gv('f-pmNarrative'), pmPrice:gv('f-pmPrice'), pmMiss:gv('f-pmMiss'),
+    exitPrice:existing?.exitPrice||'', intactVerdict:existing?.intactVerdict||'',
+    exitPostmortem:existing?.exitPostmortem||'', closedAt:existing?.closedAt||'',
   };
-
-  if (id) { const idx=db.findIndex(e=>e.id===id); db[idx]=entry; }
-  else db.push(entry);
-
-  save();
-  currentId = entry.id;
-  renderSidebar();
-  renderDetail(entry);
+  if(id){const idx=tdb.findIndex(e=>e.id===id);tdb[idx]=entry;}else tdb.push(entry);
+  saveTracker(); currentEntryId=entry.id; _conviction=null; _phase=null;
+  renderTrackerSidebar(); renderDetail(entry);
 }
 
 function deleteEntry(id) {
-  if (!confirm('Delete this entry?')) return;
-  db = db.filter(e=>e.id!==id);
-  currentId = null;
-  save();
-  renderSidebar();
-  showEmpty();
+  if(!confirm('Delete this entry?')) return;
+  tdb=tdb.filter(e=>e.id!==id); currentEntryId=null;
+  saveTracker(); renderTrackerSidebar(); showTrackerEmpty();
 }
 
-// ───── Detail ─────
 function renderDetail(e) {
-  const pi = PHASES.indexOf(e.phase);
-  const pc = PCOLORS[pi]||'var(--muted)';
-  document.getElementById('topbar-title').textContent = e.ticker||'Entry';
-
-  const fv = (label, val) => val ? `
-    <div class="field-view">
-      <div class="field-view-label">${label}</div>
-      <div class="field-view-body">${val}</div>
-    </div>` : '';
-
-  const intactColor = {'yes':'var(--green)','partial':'var(--yellow)','no':'var(--red)'}[e.intactVerdict]||'var(--muted)';
-  const intactLabel = {'yes':'Thesis intact','partial':'Partially intact','no':'Thesis was wrong'}[e.intactVerdict]||'';
-
-  document.getElementById('content').innerHTML = `
+  const pi=PHASES.indexOf(e.phase);
+  const pc=PCOLORS[pi]||'var(--muted)';
+  document.getElementById('topbar-title').textContent=e.ticker||'Entry';
+  const fv=(label,val)=>val?`<div class="field-view"><div class="field-view-label">${label}</div><div class="field-view-body">${val}</div></div>`:'';
+  const ic={'yes':'var(--green)','partial':'var(--yellow)','no':'var(--red)'}[e.intactVerdict]||'var(--muted)';
+  const il={'yes':'Thesis intact','partial':'Partial','no':'Thesis wrong'}[e.intactVerdict]||'';
+  document.getElementById('main-content').innerHTML=`
   <div class="fade-in">
-    <div class="det-hero">
+    <div style="margin-bottom:18px">
       <div class="det-ticker">
-        <div class="pdot" style="background:${pc};width:10px;height:10px;border-radius:50%"></div>
+        <span class="pdot" style="background:${pc};width:10px;height:10px"></span>
         ${e.ticker}
         <span class="badge b-${e.outcome}">${e.outcome}</span>
-        ${e.direction !== 'Long' ? `<span style="font-size:13px;color:var(--muted);font-weight:400">${e.direction}</span>` : ''}
-        ${e.intactVerdict ? `<span style="font-size:11px;color:${intactColor};font-weight:600">${intactLabel}</span>` : ''}
+        ${e.direction!=='Long'?`<span style="font-size:13px;color:var(--muted);font-weight:400">${e.direction}</span>`:''}
+        ${e.intactVerdict?`<span style="font-size:11px;color:${ic};font-weight:600">${il}</span>`:''}
       </div>
-      <div class="det-sub">${fmtFull(e.createdAt)} · ${e.chain} · ${e.source} · ${e.size} size · ${e.timescale} narrative</div>
-
-      <div class="cycle-wrap">
-        <div class="cycle-bar">
-          ${PHASES.map((p,i)=>`<div class="cycle-seg ${e.phase===p?'on':''}" style="background:${PCOLORS[i]}"></div>`).join('')}
-        </div>
-        <div class="cycle-labels">
-          ${PHASES.map((p,i)=>`<div class="cycle-lbl ${e.phase===p?'on':''}" style="${e.phase===p?`color:${PCOLORS[i]}`:''}">${p}</div>`).join('')}
-        </div>
-      </div>
+      <div class="det-sub">${fmtDateFull(e.createdAt)} · ${e.chain||''} · ${e.source||''} · ${e.size||''} · ${e.timescale||''}</div>
+      <div class="cycle-bar">${PHASES.map((p,i)=>`<div class="cycle-seg ${e.phase===p?'on':''}" style="background:${PCOLORS[i]}"></div>`).join('')}</div>
+      <div class="cycle-labels">${PHASES.map((p,i)=>`<div class="cycle-lbl ${e.phase===p?'on':''}" style="${e.phase===p?`color:${PCOLORS[i]}`:''}">${p}</div>`).join('')}</div>
     </div>
-
     <div class="det-grid">
-      <div class="det-cell">
-        <div class="field-view-label">MC at Entry</div>
-        <div class="det-cell-val">${e.mc||'—'}</div>
-      </div>
-      <div class="det-cell">
-        <div class="field-view-label">Entry</div>
-        <div class="det-cell-val">${e.entry||'—'}</div>
-      </div>
-      <div class="det-cell">
-        <div class="field-view-label">Exit</div>
-        <div class="det-cell-val" style="color:${e.outcome==='win'?'var(--green)':e.outcome==='loss'?'var(--red)':'var(--muted)'}">${e.exitPrice||'—'}</div>
-      </div>
-      <div class="det-cell">
-        <div class="field-view-label">Dev Risk</div>
-        <div class="det-cell-val" style="font-size:11px">${e.devRisk||'—'}</div>
-      </div>
-      <div class="det-cell">
-        <div class="field-view-label">Conviction</div>
-        <div class="det-cell-val" style="color:var(--orange)">${e.size||'—'}</div>
-      </div>
-      <div class="det-cell">
-        <div class="field-view-label">Timescale</div>
-        <div class="det-cell-val">${e.timescale||'—'}</div>
-      </div>
+      <div class="det-cell"><div class="field-view-label">MC Entry</div><div class="det-cell-val">${e.mc||'—'}</div></div>
+      <div class="det-cell"><div class="field-view-label">Entry</div><div class="det-cell-val">${e.entry||'—'}</div></div>
+      <div class="det-cell"><div class="field-view-label">Exit</div><div class="det-cell-val" style="color:${e.outcome==='win'?'var(--green)':e.outcome==='loss'?'var(--red)':'var(--muted)'}">${e.exitPrice||'—'}</div></div>
+      <div class="det-cell"><div class="field-view-label">Dev Risk</div><div class="det-cell-val" style="font-size:11px">${e.devRisk||'—'}</div></div>
+      <div class="det-cell"><div class="field-view-label">Size</div><div class="det-cell-val" style="color:var(--orange)">${e.size||'—'}</div></div>
+      <div class="det-cell"><div class="field-view-label">Timescale</div><div class="det-cell-val">${e.timescale||'—'}</div></div>
     </div>
-
-    ${e.thesis1 ? `
-    <div style="background:var(--s2);border-left:3px solid ${pc};padding:12px 16px;margin-bottom:20px;font-size:13px;line-height:1.7">
-      ${e.thesis1}
-    </div>` : ''}
-
-    ${e.exitTrigger ? `
-    <div style="background:var(--s2);border-left:3px solid var(--red);padding:12px 16px;margin-bottom:20px;font-size:12px;line-height:1.7;color:var(--muted)">
-      <span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);display:block;margin-bottom:4px">Exit Trigger</span>
-      ${e.exitTrigger}
-    </div>` : ''}
-
-    ${e.narrativeCore||e.whyNow||e.mustBeTrue ? `
-      <div class="sec-label">Thesis</div>
-      ${fv('Core Narrative', e.narrativeCore)}
-      ${fv('Why Now', e.whyNow)}
-      ${fv('What Must Be True', e.mustBeTrue)}
-    ` : ''}
-
-    ${e.kol||e.catalysts||e.edge ? `
-      <div class="sec-label">Intelligence</div>
-      ${fv('KOL / Social Signal', e.kol)}
-      ${fv('Upcoming Catalysts', e.catalysts)}
-      ${fv('My Edge', e.edge)}
-    ` : ''}
-
-    ${e.exitPostmortem||e.pmNarrative||e.pmPrice||e.pmMiss ? `
-      <div class="sec-label">Post-Mortem</div>
-      ${e.exitPostmortem ? fv('What actually happened', e.exitPostmortem) : ''}
-      ${fv('Did narrative play out?', e.pmNarrative)}
-      ${fv('Did price follow narrative?', e.pmPrice)}
-      ${fv('What did I miss?', e.pmMiss)}
-    ` : ''}
-
+    ${e.thesis1?`<div style="background:var(--s2);border-left:3px solid ${pc};padding:10px 14px;margin-bottom:18px;font-size:12px;line-height:1.7">${e.thesis1}</div>`:''}
+    ${e.exitTrigger?`<div style="background:var(--s2);border-left:3px solid var(--red);padding:10px 14px;margin-bottom:18px;font-size:12px;color:var(--muted)"><span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);display:block;margin-bottom:3px">Exit Trigger</span>${e.exitTrigger}</div>`:''}
+    ${e.narrativeCore||e.whyNow||e.mustBeTrue?`<div class="sec-label">Thesis</div>${fv('Core Narrative',e.narrativeCore)}${fv('Why Now',e.whyNow)}${fv('What Must Be True',e.mustBeTrue)}`:''}
+    ${e.kol||e.catalysts||e.edge?`<div class="sec-label">Intelligence</div>${fv('KOL / Social',e.kol)}${fv('Catalysts',e.catalysts)}${fv('Edge',e.edge)}`:''}
+    ${e.exitPostmortem||e.pmNarrative||e.pmPrice||e.pmMiss?`<div class="sec-label">Post-Mortem</div>${fv('What happened',e.exitPostmortem)}${fv('Narrative play out?',e.pmNarrative)}${fv('Price follow?',e.pmPrice)}${fv('What did I miss?',e.pmMiss)}`:''}
     <div class="btn-row">
       <button class="btn btn-primary" onclick="editEntry('${e.id}')">Edit</button>
-      ${e.outcome==='open' ? `<button class="btn btn-primary" style="background:var(--red)" onclick="openExitModal('${e.id}')">Close Trade</button>` : ''}
+      ${e.outcome==='open'?`<button class="btn btn-primary" style="background:var(--red)" onclick="openExitModal('${e.id}')">Close Trade</button>`:''}
     </div>
   </div>`;
 }
 
 function editEntry(id) {
-  const e = db.find(x=>x.id===id);
-  document.getElementById('topbar-title').textContent = `Edit — ${e.ticker}`;
+  const e=tdb.find(x=>x.id===id);
+  _fs={phase:e.phase||'Emerging',chain:e.chain||'SOL',source:e.source||'Own Scan',size:e.size||'1×',direction:e.direction||'Long',timescale:e.timescale||'Days',outcome:e.outcome||'open'};
+  document.getElementById('topbar-title').textContent='Edit — '+e.ticker;
   renderForm(e);
 }
 
-// ───── Exit modal ─────
+// ── Exit modal ──
 function openExitModal(id) {
-  _exitId = id;
-  _intactVal = null;
-  const e = db.find(x=>x.id===id);
-  const preview = e.mustBeTrue || e.thesis1 || e.narrativeCore || '(No thesis recorded)';
-  document.getElementById('exit-thesis-preview').textContent = preview;
-  document.getElementById('exit-postmortem').value = '';
-  document.getElementById('exit-price').value = '';
-  document.getElementById('exit-outcome').value = 'win';
+  _exitId=id; _intactVal=null;
+  const e=tdb.find(x=>x.id===id);
+  document.getElementById('exit-thesis-preview').textContent=e.mustBeTrue||e.thesis1||e.narrativeCore||'(No thesis recorded)';
+  document.getElementById('exit-postmortem').value='';
+  document.getElementById('exit-price').value='';
+  document.getElementById('exit-outcome').value='win';
   document.querySelectorAll('.intact-opt').forEach(el=>el.classList.remove('on'));
-  document.getElementById('exit-modal').style.display = 'flex';
+  document.getElementById('exit-modal').style.display='flex';
 }
-
-function setIntact(v) {
-  _intactVal = v;
-  document.querySelectorAll('.intact-opt').forEach(el=>el.classList.remove('on'));
-  event.currentTarget.classList.add('on');
-}
-
-function closeModal() {
-  document.getElementById('exit-modal').style.display = 'none';
-  _exitId = null; _intactVal = null;
-}
-
+function setIntact(v,el) { _intactVal=v; document.querySelectorAll('.intact-opt').forEach(e=>e.classList.remove('on')); el.classList.add('on'); }
+function closeModal() { document.getElementById('exit-modal').style.display='none'; _exitId=null; _intactVal=null; }
 function confirmExit() {
-  if (!_exitId) return;
-  const idx = db.findIndex(e=>e.id===_exitId);
-  if (idx<0) return;
-  db[idx].outcome = document.getElementById('exit-outcome').value;
-  db[idx].exitPrice = document.getElementById('exit-price').value;
-  db[idx].intactVerdict = _intactVal||'';
-  db[idx].exitPostmortem = document.getElementById('exit-postmortem').value;
-  db[idx].closedAt = new Date().toISOString();
-  save();
-  closeModal();
-  renderSidebar();
-  renderDetail(db[idx]);
+  if(!_exitId) return;
+  const idx=tdb.findIndex(e=>e.id===_exitId);
+  if(idx<0) return;
+  tdb[idx].outcome=document.getElementById('exit-outcome').value;
+  tdb[idx].exitPrice=document.getElementById('exit-price').value;
+  tdb[idx].intactVerdict=_intactVal||'';
+  tdb[idx].exitPostmortem=document.getElementById('exit-postmortem').value;
+  tdb[idx].closedAt=new Date().toISOString();
+  saveTracker(); closeModal(); renderTrackerSidebar(); renderDetail(tdb[idx]);
 }
 
-// ───── Stats ─────
-function renderStats() {
-  document.getElementById('topbar-title').textContent = 'Statistics';
-  const total = db.length;
-  const wins = db.filter(e=>e.outcome==='win').length;
-  const losses = db.filter(e=>e.outcome==='loss').length;
-  const open = db.filter(e=>e.outcome==='open').length;
-  const closed = wins+losses;
-  const wr = closed>0?Math.round(wins/closed*100):0;
+// ══════════════════════════════════════
+// TRACKER STATS
+// ══════════════════════════════════════
+function renderTrackerStats() {
+  document.getElementById('topbar-title').textContent='Stats';
+  document.getElementById('topbar-right').innerHTML='';
+  const total=tdb.length, wins=tdb.filter(e=>e.outcome==='win').length, losses=tdb.filter(e=>e.outcome==='loss').length;
+  const open=tdb.filter(e=>e.outcome==='open').length, closed=wins+losses;
+  const wr=closed>0?Math.round(wins/closed*100):0;
+  const withVerdict=tdb.filter(e=>e.intactVerdict);
 
-  // by phase
-  const byPhase = PHASES.map(p => {
-    const trades = db.filter(e=>e.phase===p);
-    const w = trades.filter(e=>e.outcome==='win').length;
-    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
-    return { phase:p, total:trades.length, wr:c>0?Math.round(w/c*100):null };
-  });
+  const tableRows=(rows,kl,kf,color)=>`
+    <table class="stats-table"><thead><tr><th>${kl}</th><th>Trades</th><th>Win%</th><th></th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td style="font-family:var(--fh);font-weight:700">${r[kf]}</td><td>${r.total}</td>
+    <td style="color:${r.wr!==null?(r.wr>=50?'var(--green)':'var(--red)'):'var(--muted)'}">${r.wr!==null?r.wr+'%':'—'}</td>
+    <td style="width:70px">${r.wr!==null?`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${r.wr}%;background:${color}"></div></div></div>`:''}</td>
+    </tr>`).join('')}</tbody></table>`;
 
-  // by source
-  const bySrc = SOURCES.map(s => {
-    const trades = db.filter(e=>e.source===s);
-    const w = trades.filter(e=>e.outcome==='win').length;
-    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
-    return { source:s, total:trades.length, wr:c>0?Math.round(w/c*100):null };
-  }).filter(x=>x.total>0);
+  const byPhase=PHASES.map(p=>{const t=tdb.filter(e=>e.phase===p),w=t.filter(e=>e.outcome==='win').length,c=t.filter(e=>e.outcome==='win'||e.outcome==='loss').length;return{phase:p,total:t.length,wr:c>0?Math.round(w/c*100):null};});
+  const bySrc=SOURCES.map(s=>{const t=tdb.filter(e=>e.source===s),w=t.filter(e=>e.outcome==='win').length,c=t.filter(e=>e.outcome==='win'||e.outcome==='loss').length;return{source:s,total:t.length,wr:c>0?Math.round(w/c*100):null};}).filter(x=>x.total>0);
+  const byTs=TIMESCALES.map(ts=>{const t=tdb.filter(e=>e.timescale===ts),w=t.filter(e=>e.outcome==='win').length,c=t.filter(e=>e.outcome==='win'||e.outcome==='loss').length;return{ts,total:t.length,wr:c>0?Math.round(w/c*100):null};}).filter(x=>x.total>0);
+  const bySize=SIZES.map(s=>{const t=tdb.filter(e=>e.size===s),w=t.filter(e=>e.outcome==='win').length,c=t.filter(e=>e.outcome==='win'||e.outcome==='loss').length;return{size:s,total:t.length,wr:c>0?Math.round(w/c*100):null};}).filter(x=>x.total>0);
 
-  // by timescale
-  const byTs = TIMESCALES.map(t => {
-    const trades = db.filter(e=>e.timescale===t);
-    const w = trades.filter(e=>e.outcome==='win').length;
-    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
-    return { ts:t, total:trades.length, wr:c>0?Math.round(w/c*100):null };
-  }).filter(x=>x.total>0);
-
-  // thesis intact
-  const withVerdict = db.filter(e=>e.intactVerdict);
-  const intactYes = withVerdict.filter(e=>e.intactVerdict==='yes').length;
-  const intactNo = withVerdict.filter(e=>e.intactVerdict==='no').length;
-  const intactPartial = withVerdict.filter(e=>e.intactVerdict==='partial').length;
-
-  // by size
-  const bySize = SIZES.map(s => {
-    const trades = db.filter(e=>e.size===s);
-    const w = trades.filter(e=>e.outcome==='win').length;
-    const c = trades.filter(e=>e.outcome==='win'||e.outcome==='loss').length;
-    return { size:s, total:trades.length, wr:c>0?Math.round(w/c*100):null };
-  }).filter(x=>x.total>0);
-
-  const tableRows = (rows, keyLabel, keyField, color='var(--accent)') => `
-    <table class="stats-table">
-      <thead><tr><th>${keyLabel}</th><th>Trades</th><th>Win Rate</th><th></th></tr></thead>
-      <tbody>
-        ${rows.map(r=>`
-          <tr>
-            <td style="font-family:var(--fh);font-weight:700">${r[keyField]}</td>
-            <td>${r.total}</td>
-            <td style="color:${r.wr!==null?(r.wr>=50?'var(--green)':'var(--red)'):'var(--muted)'}">${r.wr!==null?r.wr+'%':'—'}</td>
-            <td style="width:80px">
-              ${r.wr!==null?`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${r.wr}%;background:${color}"></div></div></div>`:''}
-            </td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
-
-  document.getElementById('content').innerHTML = `
+  document.getElementById('main-content').innerHTML=`
   <div class="fade-in">
-    <div class="stats-main">
-      <div class="stat-card"><div class="field-view-label">Total Entries</div><div class="stat-card-val" style="color:var(--accent)">${total}</div></div>
-      <div class="stat-card"><div class="field-view-label">Win Rate</div><div class="stat-card-val" style="color:var(--green)">${wr}%</div></div>
-      <div class="stat-card"><div class="field-view-label">Open</div><div class="stat-card-val" style="color:var(--yellow)">${open}</div></div>
-      <div class="stat-card"><div class="field-view-label">W / L</div><div class="stat-card-val">${wins} <span style="color:var(--muted);font-size:16px">/</span> ${losses}</div></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="field-view-label">Total</div><div class="stat-val" style="color:var(--accent)">${total}</div></div>
+      <div class="stat-card"><div class="field-view-label">Win Rate</div><div class="stat-val" style="color:var(--green)">${wr}%</div></div>
+      <div class="stat-card"><div class="field-view-label">Open</div><div class="stat-val" style="color:var(--yellow)">${open}</div></div>
+      <div class="stat-card"><div class="field-view-label">W / L</div><div class="stat-val">${wins}<span style="color:var(--muted);font-size:14px"> / </span>${losses}</div></div>
     </div>
-
-    ${withVerdict.length > 0 ? `
-    <div class="sec-label">Thesis Integrity</div>
-    <div style="display:flex;gap:1px;background:var(--b1);border:1px solid var(--b1);margin-bottom:24px">
-      <div class="stat-card" style="flex:1"><div class="field-view-label">Intact</div><div class="stat-card-val" style="color:var(--green)">${intactYes}</div></div>
-      <div class="stat-card" style="flex:1"><div class="field-view-label">Partial</div><div class="stat-card-val" style="color:var(--yellow)">${intactPartial}</div></div>
-      <div class="stat-card" style="flex:1"><div class="field-view-label">Wrong</div><div class="stat-card-val" style="color:var(--red)">${intactNo}</div></div>
-    </div>` : ''}
-
+    ${withVerdict.length>0?`
+    <div class="stats-row-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <div class="stat-card"><div class="field-view-label">Thesis Intact</div><div class="stat-val" style="color:var(--green)">${withVerdict.filter(e=>e.intactVerdict==='yes').length}</div></div>
+      <div class="stat-card"><div class="field-view-label">Partial</div><div class="stat-val" style="color:var(--yellow)">${withVerdict.filter(e=>e.intactVerdict==='partial').length}</div></div>
+      <div class="stat-card"><div class="field-view-label">Thesis Wrong</div><div class="stat-val" style="color:var(--red)">${withVerdict.filter(e=>e.intactVerdict==='no').length}</div></div>
+    </div>`:''}
     <div class="stats-row-grid">
-      ${byPhase.some(x=>x.total>0) ? `
-      <div class="stats-table-wrap">
-        <div class="sec-label" style="margin-top:0">Win Rate by Narrative Phase</div>
-        ${tableRows(byPhase.filter(x=>x.total>0), 'Phase', 'phase', 'var(--accent)')}
-      </div>` : ''}
-      ${bySrc.length ? `
-      <div class="stats-table-wrap">
-        <div class="sec-label" style="margin-top:0">Win Rate by Source</div>
-        ${tableRows(bySrc, 'Source', 'source', 'var(--purple)')}
-      </div>` : ''}
-      ${byTs.length ? `
-      <div class="stats-table-wrap">
-        <div class="sec-label" style="margin-top:0">Win Rate by Timescale</div>
-        ${tableRows(byTs, 'Timescale', 'ts', 'var(--green)')}
-      </div>` : ''}
-      ${bySize.length ? `
-      <div class="stats-table-wrap">
-        <div class="sec-label" style="margin-top:0">Win Rate by Position Size</div>
-        ${tableRows(bySize, 'Size', 'size', 'var(--orange)')}
-      </div>` : ''}
+      ${byPhase.some(x=>x.total>0)?`<div class="stats-table-wrap"><div class="sec-label" style="margin-top:0">By Phase</div>${tableRows(byPhase.filter(x=>x.total>0),'Phase','phase','var(--accent)')}</div>`:''}
+      ${bySrc.length?`<div class="stats-table-wrap"><div class="sec-label" style="margin-top:0">By Source</div>${tableRows(bySrc,'Source','source','var(--purple)')}</div>`:''}
+      ${byTs.length?`<div class="stats-table-wrap"><div class="sec-label" style="margin-top:0">By Timescale</div>${tableRows(byTs,'Timescale','ts','var(--green)')}</div>`:''}
+      ${bySize.length?`<div class="stats-table-wrap"><div class="sec-label" style="margin-top:0">By Size</div>${tableRows(bySize,'Size','size','var(--orange)')}</div>`:''}
     </div>
-
-    ${db.length > 0 ? `
+    ${tdb.length>0?`
     <div class="sec-label">All Entries</div>
-    <div class="stats-table-wrap">
-      <table class="stats-table" style="width:100%">
-        <thead><tr><th>Ticker</th><th>Chain</th><th>Phase</th><th>Source</th><th>Size</th><th>MC</th><th>Outcome</th><th>Date</th></tr></thead>
-        <tbody>
-          ${db.slice().reverse().map(e=>`
-            <tr style="cursor:pointer" onclick="selectEntry('${e.id}');switchView('journal')">
-              <td style="font-family:var(--fh);font-weight:700">${e.ticker}</td>
-              <td>${e.chain||'—'}</td>
-              <td style="color:${PCOLORS[PHASES.indexOf(e.phase)]||'var(--muted)'}">${e.phase||'—'}</td>
-              <td>${e.source||'—'}</td>
-              <td style="color:var(--orange)">${e.size||'—'}</td>
-              <td style="color:var(--muted)">${e.mc||'—'}</td>
-              <td><span class="badge b-${e.outcome}">${e.outcome}</span></td>
-              <td style="color:var(--muted)">${fmt(e.createdAt)}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>` : ''}
+    <div class="stats-table-wrap"><table class="stats-table" style="width:100%">
+      <thead><tr><th>Ticker</th><th>Chain</th><th>Phase</th><th>Source</th><th>Size</th><th>MC</th><th>Outcome</th><th>Date</th></tr></thead>
+      <tbody>${tdb.slice().reverse().map(e=>`
+        <tr onclick="selectEntry('${e.id}');goTo('tracker')">
+          <td style="font-family:var(--fh);font-weight:700">${e.ticker}</td>
+          <td>${e.chain||'—'}</td>
+          <td style="color:${PCOLORS[PHASES.indexOf(e.phase)]||'var(--muted)'}">${e.phase||'—'}</td>
+          <td>${e.source||'—'}</td>
+          <td style="color:var(--orange)">${e.size||'—'}</td>
+          <td style="color:var(--muted)">${e.mc||'—'}</td>
+          <td><span class="badge b-${e.outcome}">${e.outcome}</span></td>
+          <td style="color:var(--muted)">${fmtDate(e.createdAt)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`:''}
   </div>`;
 }
 
-// ───── Init ─────
-renderSidebar();
-if (!db.length) {
-  document.getElementById('content').innerHTML = `
-    <div class="empty fade-in">
-      <div class="empty-glyph">∅</div>
-      <div style="font-family:var(--fh);font-weight:700;color:var(--text)">No entries yet.</div>
-      <div style="font-size:11px;max-width:260px;margin-top:4px">Every trade starts with a narrative.<br>Start capturing yours.</div>
-      <button class="btn btn-primary" onclick="startNewEntry()" style="margin-top:12px">New Entry</button>
-    </div>`;
+// ══════════════════════════════════════
+// BACKTEST
+// ══════════════════════════════════════
+function snapshotScan(results) {
+  const snaps=JSON.parse(localStorage.getItem('scanner-snapshots')||'[]');
+  snaps.push({
+    id:uid(), scannedAt:new Date().toISOString(),
+    tokens:results.map(t=>({
+      id:t.id,address:t.address,symbol:t.symbol,name:t.name,chain:t.chain,
+      score:t.score,mc:t.mc,price:t.price,
+      priceChange1h:t.priceChange1h,priceChange6h:t.priceChange6h,priceChange24h:t.priceChange24h,
+      volume24h:t.volume24h,liquidity:t.liquidity,buys1h:t.buys1h,sells1h:t.sells1h,
+      boostAmount:t.boostAmount,signals:t.signals.map(s=>s.t),thesis:t.thesis,pairUrl:t.pairUrl,
+      price4h:null,price24h:null,price72h:null,pct4h:null,pct24h:null,pct72h:null,lastChecked:null,
+    }))
+  });
+  if(snaps.length>90) snaps.splice(0,snaps.length-90);
+  localStorage.setItem('scanner-snapshots',JSON.stringify(snaps));
 }
+
+async function refreshOutcomes() {
+  const snaps=JSON.parse(localStorage.getItem('scanner-snapshots')||'[]');
+  if(!snaps.length) return 0;
+  const now=Date.now(); let updated=0;
+  for (const snap of snaps) {
+    const age=(now-new Date(snap.scannedAt).getTime())/3600000;
+    for (const token of snap.tokens) {
+      if (!token.address) continue;
+      const needs=(age>=4&&token.price4h===null)||(age>=24&&token.price24h===null)||(age>=72&&token.price72h===null);
+      if (!needs) continue;
+      try {
+        const ch=token.chain==='SOL'?'solana':'base';
+        const r=await fetch(`https://api.dexscreener.com/tokens/v1/${ch}/${token.address}`);
+        const d=await r.json();
+        const pairs=d?.pairs||[];
+        if(!pairs.length) continue;
+        const pair=pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+        const cp=parseFloat(pair.priceUsd)||0;
+        const ep=token.price||0;
+        const pct=ep>0?((cp-ep)/ep)*100:null;
+        if(age>=4&&token.price4h===null){token.price4h=cp;token.pct4h=pct;}
+        if(age>=24&&token.price24h===null){token.price24h=cp;token.pct24h=pct;}
+        if(age>=72&&token.price72h===null){token.price72h=cp;token.pct72h=pct;}
+        token.lastChecked=new Date().toISOString();
+        updated++;
+        await new Promise(r=>setTimeout(r,200));
+      } catch(e){}
+    }
+  }
+  if(updated>0) localStorage.setItem('scanner-snapshots',JSON.stringify(snaps));
+  return updated;
+}
+
+async function renderBacktest() {
+  document.getElementById('topbar-title').textContent='Backtest';
+  document.getElementById('topbar-right').innerHTML='';
+  document.getElementById('main-content').innerHTML='<div class="empty"><div class="pulse" style="margin:0 auto 10px"></div><div>Loading…</div></div>';
+  await refreshOutcomes();
+  renderBacktestContent();
+}
+
+function renderBacktestContent() {
+  const snaps=JSON.parse(localStorage.getItem('scanner-snapshots')||'[]');
+  if (!snaps.length) {
+    document.getElementById('main-content').innerHTML=`
+      <div class="empty fade-in">
+        <div class="empty-glyph">◌</div>
+        <div style="font-family:var(--fh);font-weight:700;color:var(--text)">No scan history yet.</div>
+        <div style="font-size:11px;color:var(--muted);max-width:280px;margin:6px auto">Run your first scan. Every scan is auto-snapshotted. Prices are checked at 4h, 24h, and 72h to build your performance dataset.</div>
+      </div>`;
+    return;
+  }
+
+  const all=snaps.flatMap(s=>s.tokens);
+  const w24=all.filter(t=>t.pct24h!==null);
+  const wins=w24.filter(t=>t.pct24h>20).length;
+  const wr=w24.length>0?Math.round(wins/w24.length*100):null;
+  const avg=w24.length>0?w24.reduce((a,t)=>a+t.pct24h,0)/w24.length:null;
+  const w72=all.filter(t=>t.pct72h!==null);
+  const wr72=w72.length>0?Math.round(w72.filter(t=>t.pct72h>30).length/w72.length*100):null;
+
+  // signal accuracy
+  const sigStats={};
+  for(const t of w24){
+    for(const sig of (t.signals||[])){
+      const k=sig.replace(/[0-9.$×%+\-.]/g,'').trim().slice(0,28);
+      if(!k||k.length<3) continue;
+      if(!sigStats[k]) sigStats[k]={wins:0,total:0};
+      sigStats[k].total++;
+      if(t.pct24h>20) sigStats[k].wins++;
+    }
+  }
+  const sigArr=Object.entries(sigStats).filter(([k,v])=>v.total>=3).map(([k,v])=>({name:k,wr:Math.round(v.wins/v.total*100),total:v.total})).sort((a,b)=>b.wr-a.wr);
+
+  const brackets=[{label:'70–100',min:70,max:100},{label:'50–69',min:50,max:69},{label:'0–49',min:0,max:49}];
+  const brkStats=brackets.map(b=>{const t=w24.filter(x=>x.score>=b.min&&x.score<=b.max),w=t.filter(x=>x.pct24h>20).length;return{...b,total:t.length,wr:t.length>0?Math.round(w/t.length*100):null};});
+
+  const fd=n=>{if(n===null||n===undefined) return '<span class="dm">—</span>';const cls=n>0?'dp':n<0?'dn':'dm';return `<span class="${cls}">${n>0?'+':''}${n.toFixed(1)}%</span>`;};
+  const oc=p=>{if(p===null) return 'op-pend';if(p>30) return 'op-up';if(p<-20) return 'op-down';return Math.abs(p)<10?'op-flat':p>0?'op-up':'op-down';};
+  const ol=p=>{if(p===null) return 'Pending';if(p>100) return 'Moon';if(p>30) return 'Win';if(p>0) return 'Up';if(p>-20) return 'Flat';return 'Loss';};
+
+  document.getElementById('main-content').innerHTML=`
+  <div class="fade-in">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div>
+        <div style="font-family:var(--fh);font-size:16px;font-weight:800;letter-spacing:-0.3px">Backtest Results</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${snaps.length} scans · ${all.length} tokens · ${w24.length} with 24h outcome</div>
+      </div>
+      <button class="refresh-btn" onclick="doRefresh(this)">↻ Refresh Prices</button>
+    </div>
+
+    <div class="bt-summary">
+      <div class="bt-card"><div class="field-view-label">24h Win Rate</div><div class="bt-val" style="color:${wr!==null?(wr>=50?'var(--green)':'var(--red)'):'var(--muted)'}">${wr!==null?wr+'%':'—'}</div><div style="font-size:10px;color:var(--muted)">${w24.length} resolved</div></div>
+      <div class="bt-card"><div class="field-view-label">Avg 24h Return</div><div class="bt-val" style="color:${avg!==null?(avg>0?'var(--green)':'var(--red)'):'var(--muted)'}">${avg!==null?(avg>0?'+':'')+avg.toFixed(1)+'%':'—'}</div></div>
+      <div class="bt-card"><div class="field-view-label">72h Win Rate</div><div class="bt-val" style="color:${wr72!==null?(wr72>=50?'var(--green)':'var(--red)'):'var(--muted)'}">${wr72!==null?wr72+'%':'—'}</div><div style="font-size:10px;color:var(--muted)">${w72.length} resolved</div></div>
+      <div class="bt-card"><div class="field-view-label">Scans</div><div class="bt-val" style="color:var(--yellow)">${snaps.length}</div></div>
+      <div class="bt-card"><div class="field-view-label">Tracked</div><div class="bt-val">${all.length}</div></div>
+    </div>
+
+    ${sigArr.length>0?`
+    <div class="sec-label">Signal Accuracy (24h >20%)</div>
+    <div class="sig-acc-grid">
+      ${sigArr.slice(0,9).map(s=>`
+        <div class="sig-acc-card">
+          <div style="font-size:10px;color:#aaa;margin-bottom:4px">${s.name}</div>
+          <div style="font-family:var(--fh);font-size:18px;font-weight:800;color:${s.wr>=50?'var(--green)':s.wr>=35?'var(--yellow)':'var(--red)'}">${s.wr}%</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">${s.total} trades</div>
+        </div>`).join('')}
+    </div>`:''}
+
+    ${w24.length>=5?`
+    <div class="sec-label">Win Rate by Score Bracket</div>
+    <div style="display:flex;gap:1px;background:var(--b1);border:1px solid var(--b1);margin-bottom:20px">
+      ${brkStats.map(b=>`<div style="flex:1;background:var(--s2);padding:12px 14px">
+        <div class="field-view-label">Score ${b.label}</div>
+        <div style="font-family:var(--fh);font-size:18px;font-weight:800;margin-top:4px;color:${b.wr!==null?(b.wr>=50?'var(--green)':b.wr>=35?'var(--yellow)':'var(--red)'):'var(--muted)'}">${b.wr!==null?b.wr+'%':'—'}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${b.total} tokens</div>
+      </div>`).join('')}
+    </div>`:''}
+
+    <div class="sec-label">Scan History</div>
+    ${snaps.slice().reverse().map(snap=>{
+      const sd=new Date(snap.scannedAt);
+      const res=snap.tokens.filter(t=>t.pct24h!==null).length;
+      const sw=snap.tokens.filter(t=>t.pct24h>20).length;
+      return `<div class="scan-group">
+        <div class="scan-group-hdr">
+          <div class="scan-group-date">${sd.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · ${sd.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
+          <div style="font-size:10px;color:var(--muted)">${snap.tokens.length} tokens · ${res} resolved${res>0?' · '+sw+' wins':''}</div>
+        </div>
+        <table class="bt-table">
+          <thead><tr><th>Token</th><th>Chain</th><th>Score</th><th>MC</th><th>Entry</th><th>4h</th><th>24h</th><th>72h</th></tr></thead>
+          <tbody>${snap.tokens.map(t=>`
+            <tr>
+              <td style="font-family:var(--fh);font-weight:700">${t.symbol}</td>
+              <td style="color:var(--muted)">${t.chain}</td>
+              <td style="font-family:var(--fh);font-weight:700;color:${scoreColor(t.score)}">${t.score}</td>
+              <td style="color:var(--muted)">${fmtMC(t.mc)}</td>
+              <td style="color:var(--muted);font-size:10px">${t.price?t.price.toFixed(6):'—'}</td>
+              <td>${fd(t.pct4h)}</td>
+              <td>${t.pct24h!==null?`<span class="op ${oc(t.pct24h)}">${ol(t.pct24h)}</span> ${fd(t.pct24h)}`:'<span style="color:var(--dim);font-size:10px">pending</span>'}</td>
+              <td>${fd(t.pct72h)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }).join('')}
+
+    <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--b1)">
+      <button class="btn-ghost btn-sm" onclick="exportCSV()">↓ Export CSV</button>
+      <button class="btn-ghost btn-sm" style="color:var(--red)" onclick="clearBtHistory()">Clear History</button>
+    </div>
+  </div>`;
+}
+
+async function doRefresh(btn) {
+  btn.textContent='↻ Refreshing…'; btn.disabled=true;
+  const n=await refreshOutcomes();
+  btn.textContent=n>0?`↻ Updated ${n}`:'↻ Refresh';
+  btn.disabled=false;
+  renderBacktestContent();
+}
+
+function exportCSV() {
+  const snaps=JSON.parse(localStorage.getItem('scanner-snapshots')||'[]');
+  const rows=[['Date','Symbol','Chain','Score','MC','Entry Price','4h%','24h%','72h%','Signals']];
+  for(const snap of snaps) for(const t of snap.tokens)
+    rows.push([snap.scannedAt,t.symbol,t.chain,t.score,t.mc,t.price,t.pct4h??'',t.pct24h??'',t.pct72h??'',(t.signals||[]).join('|')]);
+  const csv=rows.map(r=>r.map(v=>JSON.stringify(String(v??''))).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='backtest-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+}
+
+function clearBtHistory() {
+  if(!confirm('Delete all scan history?')) return;
+  localStorage.removeItem('scanner-snapshots');
+  renderBacktestContent();
+}
+
+// ══════════════════════════════════════
+// KEYS
+// ══════════════════════════════════════
+function loadKeys() {
+  keys=JSON.parse(localStorage.getItem('scanner-keys')||'{}');
+  if(keys.anthropic) document.getElementById('key-anthropic').value=keys.anthropic;
+  if(keys.helius) document.getElementById('key-helius').value=keys.helius;
+  if(keys.redditId) document.getElementById('key-reddit-id').value=keys.redditId;
+  if(keys.redditSecret) document.getElementById('key-reddit-secret').value=keys.redditSecret;
+}
+function saveKeys() {
+  keys={anthropic:gv('key-anthropic'),helius:gv('key-helius'),redditId:gv('key-reddit-id'),redditSecret:gv('key-reddit-secret')};
+  localStorage.setItem('scanner-keys',JSON.stringify(keys));
+}
+function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+loadKeys();
+goTo('scanner');
+// Refresh backtest prices in background on load
+refreshOutcomes();
 </script>
 </body>
 </html>
